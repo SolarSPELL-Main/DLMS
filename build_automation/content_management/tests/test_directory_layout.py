@@ -113,6 +113,7 @@ class DirectoryTestCase(APITestCase):
     """
     Test Cases for Directories (a.k.a Folders)
     """
+
     def setUp(self):
         self.dir_layout = DirectoryLayout.objects.create(
             name="foo", description="bar",
@@ -298,6 +299,7 @@ class DirectoryLayoutClone(APITestCase):
     """
     Test the Library Version cloning.
     """
+
     def setUp(self):
         self.dir_layout = DirectoryLayout.objects.create(
             name="foo", description="bar",

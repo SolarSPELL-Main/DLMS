@@ -1,5 +1,5 @@
 import os
-import array
+
 from django.core.files.base import ContentFile
 from rest_framework import filters, status
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
@@ -9,12 +9,13 @@ from rest_framework.viewsets import ModelViewSet, ViewSet
 
 from content_management.exceptions import DuplicateContentFileException
 from content_management.models import (
-    Build, Cataloger, Content, Coverage, Creator, Directory, DirectoryLayout, Keyword, Language, Subject, Workarea, MetadataSheet
+    Build, Cataloger, Content, Coverage, Creator, Directory, DirectoryLayout, Keyword, Language, MetadataSheet,
+    Subject, Workarea
 )
 from content_management.serializers import (
     BuildSerializer, CatalogerSerializer, ContentSerializer, CoverageSerializer, CreatorSerializer,
-    DirectoryLayoutSerializer, DirectorySerializer, KeywordSerializer, LanguageSerializer, SubjectSerializer,
-    WorkareaSerializer, MetadataSheetSerializer
+    DirectoryLayoutSerializer, DirectorySerializer, KeywordSerializer, LanguageSerializer, MetadataSheetSerializer,
+    SubjectSerializer, WorkareaSerializer
 )
 from content_management.tasks import start_dirlayout_build
 from content_management.utils import DiskSpace, LibraryVersionBuildUtil
@@ -25,7 +26,7 @@ class ContentApiViewset(ModelViewSet):
     serializer_class = ContentSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name', 'description')
- 
+
     def create(self, request, *args, **kwargs):
         try:
             return super().create(request, *args, **kwargs)
@@ -90,6 +91,7 @@ class LanguageViewSet(ModelViewSet):
 class CatalogerViewSet(ModelViewSet):
     serializer_class = CatalogerSerializer
     queryset = Cataloger.objects.all()
+
 
 class DirectoryLayoutViewSet(ModelViewSet):
     serializer_class = DirectoryLayoutSerializer
@@ -174,6 +176,7 @@ class AllTagsApiViewSet(ViewSet, ListModelMixin):
     Get all kinds of tags in a single API call
     creator, coverage, subjects, workareas, keywords, language and cataloger
     """
+
     def list(self, request, *args, **kwarsgs):
         response_data = {
             'creators': Creator.objects.all().values(),
@@ -232,12 +235,12 @@ class DiskSpaceViewSet(ViewSet):
             'total_space': dp.getfreespace()[1]
         }
         return Response(data)
-        
+
 
 class MetadataSheetApiViewSet(ModelViewSet):
     serializer_class = MetadataSheetSerializer
     queryset = MetadataSheet.objects.all()
-   
+
     def create(self, request, *args, **kwargs):
         try:
             return super().create(request, *args, **kwargs)
@@ -253,14 +256,15 @@ class MetadataSheetApiViewSet(ModelViewSet):
             }
             return Response(data, status=status.HTTP_409_CONFLICT)
 
+
 class MetadataMatchViewSet(ViewSet):
-    queryset = Content.objects.values_list('name', flat=True);
+    queryset = Content.objects.values_list('name', flat=True)
     '''print(list(queryset))'''
-    def getNames(self, request):    
-        fileNameArray = list(queryset)
-        data =  {
-            content_files: fileNameArray
+
+    def get_names(self, request):
+        file_name_array = list(self.queryset)
+        data = {
+            'content_files': file_name_array
         }
-        
-        
+
         return Response(data)

@@ -22,7 +22,7 @@ from rest_framework import routers
 from content_management.api_views import (
     AllTagsApiViewSet, BuildLibraryVersionViewSet, CatalogerViewSet, ContentApiViewset, CoverageViewSet,
     CreatorViewSet, DirectoryCloneApiViewSet, DirectoryLayoutViewSet, DirectoryViewSet, DiskSpaceViewSet,
-    KeywordViewSet, LanguageViewSet, SubjectViewSet, WorkareaViewSet, MetadataSheetApiViewSet, MetadataMatchViewSet
+    KeywordViewSet, LanguageViewSet, MetadataMatchViewSet, MetadataSheetApiViewSet, SubjectViewSet, WorkareaViewSet
 )
 
 router = routers.SimpleRouter()

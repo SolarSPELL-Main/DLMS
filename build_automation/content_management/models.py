@@ -269,11 +269,11 @@ class Build(models.Model):
         ordering = ['pk']
 
 
-class MetadataSheet(models.Model): 
+class MetadataSheet(models.Model):
     def set_original_name(self, file_name):
         self.original_file_name = file_name
         return os.path.join("metadata", file_name)
-    
+
     # The Actual File
     metadata_file = models.FileField("File", upload_to=set_original_name)
     name = models.CharField(max_length=400, null=True)
@@ -281,12 +281,12 @@ class MetadataSheet(models.Model):
         "Content updated on",
         help_text='Date when the content was last updated'
     )'''
-    
+
     metadata_file_uploaded = False
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.original_file = self.metadata_file
-    
+
     class Meta:
         ordering = ['pk']
