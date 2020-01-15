@@ -7,7 +7,8 @@ import BulkUploadContent from './bulk_upload_content';
 import BulkMetadataUpload from './bulk_metadata_upload';
 import FileListComponent from './file_list_component';
 import {buildMapFromArray} from './utils';
-import {APP_URLS} from "./url";
+import {DownloadExcelButton} from "./download_excel"
+import {APP_URLS, FILTER_PARAMS, get_pagination_query, get_filter_query} from "./url";
 import axios from 'axios';
 
 const styles = theme => ({
@@ -15,12 +16,12 @@ const styles = theme => ({
         flexGrow: 1,
     },
     paper: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
         textAlign: 'center',
         color: theme.palette.text.secondary,
     },
     button: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(1),
     },
     input: {
         display: 'none',
@@ -43,8 +44,14 @@ class ContentManagement extends React.Component{
             content: null,
             tags: {},
             isLoaded: false,
-			shouldRefresh: false,
+            shouldRefresh: false,
+            totalCount: 0,
+            page_id: 1,
+            page_size: 10,
+            filters: []
         };
+        this.defaultLoadParams = [1, 10, []]
+
         this.setCurrentView = this.setCurrentView.bind(this);
         this.tagIdTagsMap = {};
         this.handleFileDelete = this.handleFileDelete.bind(this);
@@ -55,13 +62,11 @@ class ContentManagement extends React.Component{
         this.uploadBulkMetadata = this.uploadBulkMetadata.bind(this);
         this.handleContentEdit = this.handleContentEdit.bind(this);
         this.handleCloseSnackbar = this.handleCloseSnackbar.bind(this);
+        this.loadDataByPage = this.loadDataByPage.bind(this);
     }
-    /*
-    * Populate page with all uploaded content
-    */
+
     componentDidMount() {
-		//console.log("did mount");
-        this.loadData()
+        this.loadDataByPage(...this.defaultLoadParams)
     }
 
     buildTagIdTagsMap(tags) {
@@ -70,31 +75,31 @@ class ContentManagement extends React.Component{
         Object.keys(tags).forEach(eachKey => {
             tagIdTagMap[eachKey] = buildMapFromArray(tags[eachKey], 'id');
         });
-        console.log(tagIdTagMap);
         return tagIdTagMap;
     }
     /*
     * Get all uploaded content
     */
-    loadData() {
+    loadDataByPage(page_id, page_size, filters) {
         const currInstance = this;
         const allRequests = [];
         allRequests.push(axios.get(APP_URLS.ALLTAGS_LIST, {responseType: 'json'}).then(function(response) {
             currInstance.tagIdTagsMap=currInstance.buildTagIdTagsMap(response.data);
             return response;
         }));
-        allRequests.push(axios.get(APP_URLS.CONTENTS_LIST, {
-            responseType: 'json'}));
+        allRequests.push(axios.get(APP_URLS.CONTENTS_LIST + get_pagination_query(page_id, page_size) + "&" + get_filter_query(filters, FILTER_PARAMS.CONTENTS), {responseType: 'json'}));
         Promise.all(allRequests).then(function(values) {
-			
             currInstance.setState({
                 tags: values[0].data,
-                files: values[1].data, isLoaded: true
+                files: Object.values(values[1].data.results),
+                totalCount: values[1].data.count,
+                isLoaded: true
             })
         }).catch(function(error) {
             console.error(error);
-            //console.error(error.response.data);
         });
+
+        this.setState({page_id, page_size, filters})
     }
     /*
     * Process updates to text fields
@@ -176,7 +181,7 @@ class ContentManagement extends React.Component{
 		//console.log("currentState");
 		if(this.state.shouldRefresh) {
 			console.log(this.state);
-			this.loadData();
+			this.loadDataByPage(...this.defaultLoadParams);
 			this.setState({shouldRefresh: false});
 		}
 	}
@@ -228,7 +233,7 @@ class ContentManagement extends React.Component{
         const currInstance = this;
         
         
-        axios.get(APP_URLS.CONTENTS_LIST, {
+        axios.get(APP_URLS.CONTENTS_LIST + get_pagination_query(this.state.page_id, this.state.page_size), {
             responseType: 'json'
         }).then(function (response) {
             currInstance.content = response.data;
@@ -390,14 +395,14 @@ class ContentManagement extends React.Component{
                         </Button>
 					</Grid>
 					<Grid item xs>
-                        <Button variant="raised" color="primary" style={{width: '160px'}} onClick={e => {this.uploadBulkFiles()}}>
+                        <Button variant="contained" color="primary" style={{width: '160px'}} onClick={e => {this.uploadBulkFiles()}}>
                             Express Load
                         </Button>
                         
                         
                     </Grid>
 					<Grid item xs>
-                        <Button variant="raised" color="primary" style={{width: '160px'}} onClick={e => {this.uploadBulkMetadata()}}>
+                        <Button variant="contained" color="primary" style={{width: '160px'}} onClick={e => {this.uploadBulkMetadata()}}>
                             Metadata Load
                         </Button>
 					</Grid>
@@ -412,9 +417,21 @@ class ContentManagement extends React.Component{
                     
 
                     <Grid item xs={12}>
-                        {this.state.isLoaded && this.state.currentView=='manage'&&<FileListComponent tags={this.state.tags} onEdit={this.handleContentEdit}
-                                                                                                     onDelete={this.handleFileDelete} allFiles={this.state.files}
-                                                                                                     tagIdsTagsMap={this.tagIdTagsMap} />}
+                        {this.state.isLoaded && this.state.currentView=='manage' && <>
+                            <FileListComponent
+                                tags={this.state.tags}
+                                onEdit={this.handleContentEdit}
+                                onDelete={this.handleFileDelete}
+                                allFiles={this.state.files}
+                                tagIdsTagsMap={this.tagIdTagsMap}
+                                getFiles={this.loadDataByPage}
+                                totalCount={this.state.totalCount}
+                            />
+                            <DownloadExcelButton
+                                filters={this.state.filters}
+                                filter_params={FILTER_PARAMS.CONTENTS}
+                            />
+                        </>}
                         {this.state.isLoaded && this.state.currentView=='upload'&&<UploadContent onSave={this.saveContentCallback}
                                                                                                  tagIdsTagsMap={this.tagIdTagsMap} allTags={this.state.tags}
                                                                                                  content={this.state.content}/>}

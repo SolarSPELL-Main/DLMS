@@ -18,7 +18,7 @@ class DownloadBuild extends React.Component{
     /*
     * Load all the data
     */
-    componentWillReceiveProps(props) {
+    UNSAFE_componentWillReceiveProps(props) {
         this.setState({
             name: props.build.name,
             currTime: props.build.currTime,

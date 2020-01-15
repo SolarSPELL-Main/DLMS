@@ -8,8 +8,9 @@ import MainScreen from './main_screen.js';
 * Load main screen
 */
 ReactDOM.render(
-    (<React.Fragment><CssBaseline />
-    <MainScreen />
+    (<React.Fragment>
+        <CssBaseline />
+        <MainScreen />
     </React.Fragment>)
     ,
     document.getElementById('container')

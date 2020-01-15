@@ -1,10 +1,14 @@
 /*
  *  This builds a map from an array of objects.
  */
-export function buildMapFromArray(array, key) {
+const buildMapFromArray = (array, key) => {
     const retval = {};
-    array.forEach(currObj => {
+    array.map(currObj => {
             retval[currObj[key]] = currObj;
     });
     return retval;
+}
+
+export {
+    buildMapFromArray
 }

@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'django_filters',
     'frontend'
 ]
 
@@ -131,6 +132,8 @@ MEDIA_URL = '/media/'
 BUILDS_ROOT = 'build_automation/builds'
 BUILDS_URL = '/builds/'
 
+TEMP_ROOT = env.str("TEMP_ROOT")
+
 DEFAULT_FILE_STORAGE = 'content_management.storage.CustomFileStorage'
 FILE_DUPLICATION_MARKER = 'spell-cms-dup'
 
@@ -146,3 +149,8 @@ TEMP_EXTRACTION_DIR = "build_automation/temp"
 CONTENT_DIRECTORY = "content/_public"  # The location of the content files within the web server's root.
 
 BUILD_ASSETS_DIR = "build_automation/build-assets"
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'content_management.paginators.PageNumberSizePagination',
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+}

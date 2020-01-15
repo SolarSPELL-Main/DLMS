@@ -13,7 +13,7 @@ import TextField from '@material-ui/core/TextField';
 import OpenInNew from '@material-ui/icons/OpenInNew';
 
 import { DIRLAYOUT_SAVE_TYPE, HTTP_STATUS } from './constants.js';
-import { APP_URLS, get_url } from './url.js';
+import { APP_URLS } from './url.js';
 /*
 * Constructor for DirectoryLayoutInfoBoard
 */
@@ -45,7 +45,7 @@ class DirlayoutInfoBoard extends React.Component {
     /*
     * Each component will load the required files
     */
-    componentWillReceiveProps(props) {
+    UNSAFE_componentWillReceiveProps(props) {
         this.setState({
             id: props.boardData.id,
             name: props.boardData.name,
@@ -107,7 +107,7 @@ class DirlayoutInfoBoard extends React.Component {
         const currentInstance = this;
         if (this.state.id > 0) {
             // Update an existing directory layout.
-            targetUrl = get_url(APP_URLS.DIRLAYOUT_DETAIL, {id:this.state.id});
+            targetUrl = APP_URLS.DIRLAYOUT_DETAIL(this.state.id);
             axios.patch(targetUrl, payload, {
                 responseType: 'json'
             }).then(function(response) {
@@ -183,7 +183,7 @@ class DirlayoutInfoBoard extends React.Component {
     * Clone a library
     */
     cloneDirLayout(evt) {
-        const targetUrl = get_url(APP_URLS.DIRLAYOUT_CLONE, {id: this.state.id});
+        const targetUrl = APP_URLS.DIRLAYOUT_CLONE(this.state.id);
         const currentInstance = this;
         axios.post(targetUrl, {}, {
             responseType: 'json'
@@ -214,7 +214,7 @@ class DirlayoutInfoBoard extends React.Component {
     * Delete a library
     */
     deleteDirLayout() {
-        const targetUrl = get_url(APP_URLS.DIRLAYOUT_DETAIL, {id:this.state.id});
+        const targetUrl = APP_URLS.DIRLAYOUT_DETAIL(this.state.id);
         const currentInstance = this;
         axios.delete(targetUrl, {
             responseType: 'json'

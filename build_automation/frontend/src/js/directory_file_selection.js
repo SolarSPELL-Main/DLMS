@@ -8,6 +8,7 @@ import {
     IntegratedFiltering,
     IntegratedPaging,
     PagingState,
+    CustomPaging
 } from '@devexpress/dx-react-grid';
 import {
     ColumnChooser,
@@ -106,7 +107,9 @@ class FileSelectionComponent extends React.Component {
             selectedFilesMenu: {
                 selectedFile: null,
                 AnchorPos: null
-            }
+            },
+            pageSize: 10,
+            currentPage: 1
         };
         __tagIdsTagsMap = props.tagIdsTagsMap;
         this.columns = [
@@ -161,7 +164,7 @@ class FileSelectionComponent extends React.Component {
     /*
     * Components will receive data
     */
-    componentWillReceiveProps(props) {
+    UNSAFE_componentWillReceiveProps(props) {
         const selectedFiles = this.getSelectedFilesFromFileIds(props.selectedFiles, props.fileIdFileMap);
         this.setState({
             selectedFiles: selectedFiles,
@@ -252,7 +255,8 @@ class FileSelectionComponent extends React.Component {
                     <LinkTypeProvider for={['content_file']} />
                     <FilteringState defaultFilters={[]} columnExtensions={[{columnName: 'content_file', filteringEnabled: false}]} />
                     <IntegratedFiltering columnExtensions={this.filterExtensions} />
-                    <PagingState defaultCurrentPage={0} defaultPageSize={10} />
+                    <PagingState currentPage={this.state.currentPage} pageSize={this.state.pageSize} />
+                    <CustomPaging totalCount={this.props.totalCount} />
                     <IntegratedPaging />
                     <Table rowComponent={obj => {return this.tableRowComponent(obj, 'allFilesMenu')}} />
                     <TableColumnResizing defaultColumnWidths={this.defaultColumnWidths} />
@@ -261,7 +265,7 @@ class FileSelectionComponent extends React.Component {
                     <Toolbar />
                     <ColumnChooser />
                     <TableFilterRow cellComponent={this.getFilterCellComponent}/>
-                    <PagingPanel pageSizes={[5, 10, 20]} />
+                    <PagingPanel pageSizes={[5, 10, 20]} pageSize={this.state.pageSize} />
                 </Grid>
                 <Menu
                     id="all-files-menu"

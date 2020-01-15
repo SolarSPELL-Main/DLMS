@@ -5,11 +5,11 @@ import AppBar from '@material-ui/core/AppBar';
 import Typography from '@material-ui/core/Typography';
 import AutoCompleteWithChips from './autocomplete.js';
 import TextField from '@material-ui/core/TextField';
-import { DatePicker } from 'material-ui-pickers';
-import {APP_URLS, get_url} from "./url";
+import {DatePicker} from '@material-ui/pickers';
+import {APP_URLS} from "./url";
 import Snackbar from '@material-ui/core/Snackbar';
-import DateFnsUtils from 'material-ui-pickers/utils/date-fns-utils';
-import {MuiPickersUtilsProvider} from 'material-ui-pickers';
+import DateFnsUtils from "@date-io/date-fns"
+import {MuiPickersUtilsProvider} from '@material-ui/pickers';
 import {ChevronLeft, ChevronRight} from '@material-ui/icons';
 import axios from 'axios';
 import {buildMapFromArray} from "./utils";
@@ -21,12 +21,12 @@ const styles = theme => ({
         flexGrow: 1,
     },
     paper: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
         textAlign: 'center',
         color: theme.palette.text.secondary,
     },
     button: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(1),
     },
     input: {
         display: 'none',
@@ -320,7 +320,7 @@ class UploadContent extends React.Component{
         if (this.state.id > 0) {
             // Update an existing directory.
             payload.append('id', this.state.id);
-            targetUrl = get_url(APP_URLS.CONTENT_DETAIL, {id:this.state.id});
+            targetUrl = APP_URLS.CONTENT_DETAIL(this.state.id);
             axios.patch(targetUrl, payload, {
                 responseType: 'json'
             }).then(function(response) {

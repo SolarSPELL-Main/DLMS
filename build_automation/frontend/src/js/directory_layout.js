@@ -261,7 +261,7 @@ class DirectoryLayoutComponent extends React.Component {
             return response;
         }));
         allRequests.push(axios.get(APP_URLS.CONTENTS_LIST, {responseType: 'json'}).then(function(response) {
-            const fileIdFileMap = buildMapFromArray(response.data, 'id');
+            const fileIdFileMap = buildMapFromArray(response.data.results, 'id');
             return {
                 fileIdFileMap,
                 allFiles: response.data
@@ -269,16 +269,16 @@ class DirectoryLayoutComponent extends React.Component {
         }));
         allRequests.push(axios.get(APP_URLS.DIRLAYOUT_LIST, {responseType: 'json'}));
         allRequests.push(axios.get(APP_URLS.DIRECTORY_LIST, {responseType: 'json'}).then(function(response) {
-            currInstance.directoryIdDirectoryMap = buildMapFromArray(response.data, 'id');
+            currInstance.directoryIdDirectoryMap = buildMapFromArray(response.data.results, 'id');
             return response;
         }));
 
         Promise.all(allRequests).then(function(values){
-            const tags = values[0].data;
-            const allFiles = values[1].allFiles;
-            const fileIdFileMap = values[1].fileIdFileMap;
-            const dirLayouts = values[2].data;
-            const directories = values[3].data;
+            const tags = values[0].data.results;
+            const allFiles = values[1].allFiles.results;
+            const fileIdFileMap = values[1].fileIdFileMap.results;
+            const dirLayouts = values[2].data.results;
+            const directories = values[3].data.results;
             const transformedData = currInstance.transformDirectoriesToTreeData(dirLayouts, directories);
             dirLayouts.forEach(eachDirLayout => {
                 eachDirLayout.isOpen = false;
@@ -296,7 +296,6 @@ class DirectoryLayoutComponent extends React.Component {
             })
         }).catch(function(error) {
             console.error(error);
-            console.error(error.response.data);
         });
     }
     /*
@@ -481,7 +480,7 @@ class DirectoryLayoutComponent extends React.Component {
             }
 
             elements = (
-                <Grid container spacing={8}>
+                <Grid container spacing={1}>
                     <Grid item xs={3} style={{paddingLeft: '20px'}}>
                         <Button variant="contained" color="primary" onClick={this.createDirectoryLayout} style={{display: 'block', marginLeft: 'auto', marginRight: 'auto'}}>
                             New Library Version

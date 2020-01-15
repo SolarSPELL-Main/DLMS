@@ -11,7 +11,7 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import {withStyles} from '@material-ui/core/styles';
 import {creatMuiTheme} from '@material-ui/core/styles';
-import {APP_URLS, get_url} from "./url";
+import {APP_URLS} from "./url";
 import axios from 'axios';
 import Papa from 'papaparse';
 
@@ -20,12 +20,12 @@ const style = theme => ({
         flexGrow: 1,
     },
     paper: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
         textAlign: 'center',
         color: theme.palette.text.secondary,
     },
     button: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(1),
     },
     
 });
@@ -210,7 +210,7 @@ class BulkMetadataUpload extends React.Component {
                                     //if (this.state.id > 0) {
                                         // Update an existing directory.
                                         payload.append('id', currInstance.content[j].id);
-                                        targetUrl = get_url(APP_URLS.CONTENT_DETAIL, {id:currInstance.content[j].id});
+                                        targetUrl = APP_URLS.CONTENT_DETAIL(currInstance.content[j].id);
                                         axios.patch(targetUrl, payload, {
                                             responseType: 'json'
                                         }).then(function(response) {
@@ -246,17 +246,13 @@ class BulkMetadataUpload extends React.Component {
                 }
             });
             
-            
-            
-            var targetUrl = get_url(APP_URLS.METADATA_UPLOAD);
-            
             const payload = new FormData();
      
             Boolean(this.state.metadataFile) && payload.append('metadata_file', this.state.metadataFile);
             payload.append('name', this.state.metadataFileName)
             
             
-                axios.post(targetUrl, payload, {
+                axios.post(APP_URLS.METADATA_UPLOAD, payload, {
                 responseType: 'json'
             }).then(function(response) {
                 currInstance.saveMetadataCallback(response.data, true);

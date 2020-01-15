@@ -38,6 +38,7 @@ class ContentSerializer(serializers.ModelSerializer):
         content.subjects.set(validated_data['subjects'])
         content.keywords.set(validated_data['keywords'])
         content.workareas.set(validated_data['workareas'])
+        content.active.set(validated_data['active'])
         return content
 
     def update(self, content, validated_data):
@@ -55,6 +56,7 @@ class ContentSerializer(serializers.ModelSerializer):
         content.source = (validated_data.get('source', content.source))
         content.copyright = (validated_data.get('copyright', content.copyright))
         content.rights_statement = (validated_data.get('rights_statement', content.rights_statement))
+        content.active = (validated_data.get('active', content.active))
 
         return self.__create_update(content)
 
@@ -69,7 +71,7 @@ class ContentSerializer(serializers.ModelSerializer):
         model = Content
         fields = ('url', 'id', 'name', 'description', 'content_file', 'updated_time', 'last_uploaded_time', 'creators',
                   'coverage', 'subjects', 'keywords', 'workareas', 'language', 'cataloger', 'original_file_name',
-                  'source', 'copyright', 'rights_statement')
+                  'source', 'copyright', 'rights_statement', 'active')
         read_only_fields = ('original_file_name',)
         extra_kwargs = {
             'url': {'lookup_field': 'pk'},

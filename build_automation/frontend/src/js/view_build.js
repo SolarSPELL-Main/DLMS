@@ -149,7 +149,7 @@ class ViewBuildComponent extends React.Component{
         }
         else if(this.state.isLoaded && this.state.noOfBuilds > 0){
             elements=(
-                <Grid container spacing={8}>
+                <Grid container spacing={1}>
                     <Grid item xs={3} style={{paddingLeft: '20px'}}>
                         <List component="nav">
                                 <ListSubheader disableSticky component="div">Latest Image Created</ListSubheader>

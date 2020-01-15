@@ -22,7 +22,7 @@ import SortableTree from 'react-sortable-tree';
 import AutoCompleteWithChips from './autocomplete.js';
 import { HTTP_STATUS } from './constants.js';
 import FileSelectionComponent from './directory_file_selection.js'
-import { APP_URLS, get_url } from './url.js';
+import { APP_URLS } from './url.js';
 import { buildMapFromArray } from './utils.js';
 
 import 'react-sortable-tree/style.css';
@@ -138,7 +138,7 @@ class DirectoryInfoBoard extends React.Component {
     /*
     * Components will receive data
     */
-    componentWillReceiveProps(props) {
+    UNSAFE_componentWillReceiveProps(props) {
         this.tagIdsTagsMap = this.buildTagIdTagsMap(props.tags);
         const labels = this.getAutoCompleteLabelsFromTagIds(props.boardData, this.tagIdsTagsMap);
         this.setState({
@@ -224,7 +224,7 @@ class DirectoryInfoBoard extends React.Component {
         if (this.state.id > 0) {
             // Update an existing directory.
             payload.append('id', this.state.id);
-            targetUrl = get_url(APP_URLS.DIRECTORY_DETAIL, {id:this.state.id});
+            targetUrl = APP_URLS.DIRECTORY_DETAIL(this.state.id);
             axios.patch(targetUrl, payload, {
                 responseType: 'json'
             }).then(function(response) {
@@ -296,7 +296,7 @@ class DirectoryInfoBoard extends React.Component {
     * Delete the selected directory
     */
     deleteDirectory() {
-        const targetUrl = get_url(APP_URLS.DIRECTORY_DETAIL, {id:this.state.id});
+        const targetUrl = APP_URLS.DIRECTORY_DETAIL(this.state.id);
         const currentInstance = this;
         axios.delete(targetUrl, {
             responseType: 'json'
@@ -403,7 +403,7 @@ class DirectoryInfoBoard extends React.Component {
     */
     render() {
         return (
-            <Grid container spacing={24}>
+            <Grid container spacing={3}>
                 <Grid item xs={12}>
                     <Button variant="contained" color="primary" onClick={this.saveDirectory}>
                         Save
@@ -459,7 +459,7 @@ class DirectoryInfoBoard extends React.Component {
                     <Typography>
                         Filter contents to go into the folder / sub-folder by the metadata.
                     </Typography>
-                    <Grid container spacing={24} style={{marginTop: '15px'}}>
+                    <Grid container spacing={3} style={{marginTop: '15px'}}>
                         <Grid item xs={3}>
                             <Select
                                 fullWidth
@@ -481,7 +481,7 @@ class DirectoryInfoBoard extends React.Component {
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
-                    <Grid container spacing={24}>
+                    <Grid container spacing={3}>
                         <Grid item xs={3}>
                             <Select
                                 fullWidth
@@ -503,7 +503,7 @@ class DirectoryInfoBoard extends React.Component {
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
-                    <Grid container spacing={24}>
+                    <Grid container spacing={3}>
                         <Grid item xs={3}>
                             <Select
                                 fullWidth
@@ -525,7 +525,7 @@ class DirectoryInfoBoard extends React.Component {
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
-                    <Grid container spacing={24}>
+                    <Grid container spacing={3}>
                         <Grid item xs={3}>
                             <Select
                                 fullWidth
@@ -547,7 +547,7 @@ class DirectoryInfoBoard extends React.Component {
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
-                    <Grid container spacing={24}>
+                    <Grid container spacing={3}>
                         <Grid item xs={3}>
                             <Select
                                 fullWidth
@@ -569,7 +569,7 @@ class DirectoryInfoBoard extends React.Component {
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
-                    <Grid container spacing={24}>
+                    <Grid container spacing={3}>
                         <Grid item xs={3}>
                             <Select
                                 fullWidth
@@ -591,7 +591,7 @@ class DirectoryInfoBoard extends React.Component {
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
-                    <Grid container spacing={24}>
+                    <Grid container spacing={3}>
                         <Grid item xs={3}>
                             <Select
                                 fullWidth

@@ -47,6 +47,8 @@ class DiskSpace extends React.Component {
             multiplier: 1048576,
             name: "",
             value: '0',
+            used: 0,
+            available: 0
         };
         this.unit = " MB"
         this.handleChange = this.handleChange.bind(this);
@@ -81,35 +83,48 @@ class DiskSpace extends React.Component {
     * Get data from the drive(s)
     */
     loadData() {
-        const that = this;
         axios
             .get(APP_URLS.DISKSPACE, {responseType: 'json'})
             .then((response) => {
-                this.used = response.data.total_space - response.data.available_space
-                this.avail = response.data.available_space
-                this.setState({completed: 100*(response.data.total_space-response.data.available_space)/response.data.total_space});
+                this.setState({
+                    completed: 100*(response.data.total_space-response.data.available_space)/response.data.total_space,
+                    used: response.data.total_space - response.data.available_space,
+                    available: response.data.available_space
+                });
             })
             .catch((error) => {
                 console.error(error);
                 // TODO : Show the error message.
             });
     }
+
+    getUsedDisplay() {
+        (this.state.used/this.state.multiplier).toFixed(2)
+    }
+
+    getAvailableDisplay() {
+        (this.state.avail/this.state.multiplier).toFixed(2)
+    }
+
     /*
     * Render class to load all the graphics
     */
     render() {
         const { classes } = this.props;
-        var options = {
+        const options = {
             percentageInnerCutout: 50,
             responsive: true,
             animationEasing : 'easeOutBack',
         };
 
+        const availableDisp = this.getAvailableDisplay()
+        const usedDisp = this.getUsedDisplay()
+
         return (
             <div className={classes.root}>
                 <div style={{padding:20}}>
-                    <Grid container spacing={40}>
-                    <Grid item xs={2.5}>
+                    <Grid container spacing={3}>
+                    <Grid item xs={3}>
                         <Paper className={classes.paper}>Disk Usage Statistics</Paper>
                         <Paper className={classes.paper}>
                         <Select
@@ -121,9 +136,9 @@ class DiskSpace extends React.Component {
                         </Select>
                         </Paper>
                     </Grid>
-                    <Grid item xs={7}>
+                    <Grid item xs={6}>
                     </Grid>
-                    <Grid item xs={2.5}>
+                    <Grid item xs={3}>
                         <div>
                         <FormControl>
                         <RadioGroup
@@ -139,10 +154,10 @@ class DiskSpace extends React.Component {
                     </Grid>
                     {this.state.value=="0" ?
                     (
-                    <Grid container spacing={40}>
+                    <Grid container spacing={3}>
                     <Grid item xs={12}/>
-                    <Grid item xs={1.5}>
-                        <h4>Used: {(this.used/this.state.multiplier).toFixed(2)}{this.unit}</h4>
+                    <Grid item xs={2}>
+                        <h4>Used: {availableDisp}{this.unit}</h4>
                     </Grid>
                     <Grid item xs>
                         <LinearProgress
@@ -153,32 +168,36 @@ class DiskSpace extends React.Component {
                             classes={{barColorPrimary:classes.barColorPrimary}}
                             classes={{bar: classes.bar}}  />
                     </Grid>
-                    <Grid item xs={1.5}>
-                        <h4>Available: {(this.avail/this.state.multiplier).toFixed(2)}{this.unit}</h4>
+                    <Grid item xs={2}>
+                        <h4>Available: {availableDisp}{this.unit}</h4>
                     </Grid>
                     </Grid>
                     )
                     :
                     (
-                    <Grid container spacing={20}>
+                    <Grid container spacing={2}>
                     <Grid item xs/>
                     <Grid item xs={6}>
                     <h5 align="center">Hover over the Doughnut to view the values</h5>
-                        <Doughnut data={[
-                          {
-                            value: (this.used/this.state.multiplier).toFixed(2),
-                            color: '#F7464A',
-                            highlight: '#FF5A5E',
-                            label: 'Used (in' + this.unit + ')'
-                          },
-                          {
-                            value: (this.avail/this.state.multiplier).toFixed(2),
-                            color: '#46BFBD',
-                            highlight: '#5AD3D1',
-                            label: 'Available (in' + this.unit + ')'
-                          }
-                      ]} options={options} position= 'relative'/>
-
+                    <Doughnut
+                        data={{
+                            labels: ['Used (in' + this.unit + ')', 'Available (in' + this.unit + ')'],
+                            datasets: [{
+                                data: [
+                                    usedDisp,
+                                    availableDisp
+                                ],
+                                backgroundColor: [
+                                    '#F7464A',
+                                    '#46BFBD'
+                                ],
+                                hoverBackgroundColor: [
+                                    '#FF5A5E',
+                                    '#5AD3D1'
+                                ]
+                            }]
+                        }}
+                        options={options} position= 'relative'/>
                     </Grid>
                     <Grid item xs/>
                     </Grid>

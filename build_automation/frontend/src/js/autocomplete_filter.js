@@ -20,7 +20,7 @@ class AutoCompleteFilter extends React.Component {
     /*
     * Populate all the data
     */
-    componentWillReceiveProps(props) {
+    UNSAFE_componentWillReceiveProps(props) {
         const { filter } = props;
         const filterValues = filter ? filter.value : [];
         this.filterValues = filterValues;

@@ -10,7 +10,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
 import Snackbar from '@material-ui/core/Snackbar';
 
-import { APP_URLS, get_url } from './url.js';
+import { APP_URLS } from './url.js';
 /*
 * Constructor for MakeBuildDirlayoutInfo
 */
@@ -35,7 +35,7 @@ class MakeBuildDirlayoutInfo extends React.Component{
     /*
     * Components will receive data
     */
-     componentWillReceiveProps(props) {
+     UNSAFE_componentWillReceiveProps(props) {
         this.setState({
             id: props.info.id,
             name: props.info.name,
@@ -47,7 +47,7 @@ class MakeBuildDirlayoutInfo extends React.Component{
     * State to the user whether the build was successful or not
     */
     buildHandler(evt){
-        const url = get_url(APP_URLS.START_BUILD, {id: this.state.id});
+        const url = APP_URLS.START_BUILD(this.state.id);
         const currentInstance = this;
         axios.post(url, {}, {
             responseType: 'json'

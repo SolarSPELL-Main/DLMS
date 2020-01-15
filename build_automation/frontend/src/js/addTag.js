@@ -6,8 +6,6 @@ import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 import Snackbar from '@material-ui/core/Snackbar';
 
-import { APP_URLS, get_url } from './url.js';
-
 import Typography from '@material-ui/core/Typography';
 import { TAG_SAVE_TYPE, HTTP_STATUS } from './constants.js';
 /*
@@ -44,7 +42,7 @@ class TagCreation extends React.Component {
     /*
     * A method to populate the files data
     */
-    componentWillReceiveProps(props) {
+    UNSAFE_componentWillReceiveProps(props) {
 
         this.setState({
             name: '',
@@ -61,7 +59,7 @@ class TagCreation extends React.Component {
         const currentInstance = this;
         if (this.state.id > 0) {
             // Update an exising Tag.
-            targetUrl = get_url(this.props.detailUrl, { id: this.state.id });
+            targetUrl = (this.props.detailUrl, { id: this.state.id });
             axios.patch(targetUrl, payload, {
                 responseType: 'json'
             }).then(function (response) {
@@ -69,7 +67,7 @@ class TagCreation extends React.Component {
             }).catch(function (error) {
                 console.error("Error in updating the tag.", error);
                 console.error(error.response.data);
-                let errorMsg = 'Error in creating the tag.';
+                const errorMsg = 'Error in creating the tag.';
                 //Handle bad requests
             if (error.response.status === HTTP_STATUS.BAD_REQUEST) {
                 errorMsg = (<React.Fragment><b>ERROR:</b> This metadata already exists. Please rename it before trying to update.</React.Fragment>);
@@ -89,7 +87,7 @@ class TagCreation extends React.Component {
             }).catch(function (error) {
                 console.error("Error in creating a new Tag", error);
                 console.error(error.response.data);
-                let errorMsg = 'Error in creating the tag.';
+                const errorMsg = 'Error in creating the tag.';
                 //Handle bad requests
             if (error.response.status === HTTP_STATUS.BAD_REQUEST) {
                 errorMsg = (<React.Fragment><b>ERROR:</b> This metadata already exists. Please rename it before trying to add.</React.Fragment>);

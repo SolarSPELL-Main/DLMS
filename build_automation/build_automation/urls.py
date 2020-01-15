@@ -22,7 +22,8 @@ from rest_framework import routers
 from content_management.api_views import (
     AllTagsApiViewSet, BuildLibraryVersionViewSet, CatalogerViewSet, ContentApiViewset, CoverageViewSet,
     CreatorViewSet, DirectoryCloneApiViewSet, DirectoryLayoutViewSet, DirectoryViewSet, DiskSpaceViewSet,
-    KeywordViewSet, LanguageViewSet, SubjectViewSet, WorkareaViewSet, MetadataSheetApiViewSet, MetadataMatchViewSet
+    KeywordViewSet, LanguageViewSet, SubjectViewSet, WorkareaViewSet, MetadataSheetApiViewSet, MetadataMatchViewSet,
+    SpreadsheetView
 )
 
 router = routers.SimpleRouter()
@@ -55,6 +56,11 @@ urlpatterns = [
         BuildLibraryVersionViewSet.as_view({'post': 'create'}), name="dirlayout-build"
     ),
     path('api/builds/', BuildLibraryVersionViewSet.as_view({'get': 'list'}), name="build-list"),
+    path(
+        'api/spreadsheet/<str:type>/',
+        SpreadsheetView.as_view({'get': 'getSpreadsheet'}),
+        name='get-spreadsheet'
+    )
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

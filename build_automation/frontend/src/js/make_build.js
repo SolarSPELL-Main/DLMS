@@ -59,10 +59,11 @@ class MakeBuildComponent extends React.Component{
         axios.get(APP_URLS.DIRLAYOUT_LIST, {
             responseType: 'json'
         }).then(function(response) {
-            const dirLayouts = response.data;
+            const dirLayouts = response.data.results;
+            console.log(dirLayouts)
             currInstance.setState({
-                dirLayouts:dirLayouts,
-                isLoaded:true
+                dirLayouts,
+                isLoaded: true
             });
         }).catch(function(error) {
             console.error(error)
@@ -75,7 +76,7 @@ class MakeBuildComponent extends React.Component{
         var elements=null;
         if(this.state.isLoaded){
             elements=(
-                <Grid container spacing={8}>
+                <Grid container spacing={1}>
                     <Grid item xs={3} style={{paddingLeft: '20px'}}>
                         <List component="nav">
                                 <ListSubheader disableSticky component="div">Library Versions</ListSubheader>
