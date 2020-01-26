@@ -17,7 +17,7 @@ class TagCreation extends React.Component {
         this.state = {
             id: props.tag.id,
             name: props.tag.name,
-            description: props.tag.description
+            description: props.tag.name
         };
         this.handleTextFieldUpdate = this.handleTextFieldUpdate.bind(this);
         this.saveTag = this.saveTag.bind(this);
@@ -55,11 +55,11 @@ class TagCreation extends React.Component {
     */
     saveTag(evt) {
         var targetUrl = this.props.listUrl;
-        const payload = { name: this.state.name, description: this.state.description };
+        const payload = { name: this.state.name, description: this.state.name };
         const currentInstance = this;
         if (this.state.id > 0) {
             // Update an exising Tag.
-            targetUrl = (this.props.detailUrl, { id: this.state.id });
+            targetUrl = this.props.detailUrl(this.state.id);
             axios.patch(targetUrl, payload, {
                 responseType: 'json'
             }).then(function (response) {
@@ -128,14 +128,6 @@ class TagCreation extends React.Component {
                         label="Name"
                         value={this.state.name}
                         onChange={evt => this.handleTextFieldUpdate('name', evt)}
-                        fullWidth
-                        margin="normal"
-                    />
-                    <TextField
-                        id="desc"
-                        label="Description"
-                        value={this.state.description}
-                        onChange={evt => this.handleTextFieldUpdate('description', evt)}
                         fullWidth
                         margin="normal"
                     />

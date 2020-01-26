@@ -11,6 +11,7 @@ import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+import Hidden from '@material-ui/core/Hidden'
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles'
@@ -23,6 +24,7 @@ import axios from 'axios';
 //this is the new logo (logo2)
 import solarSpellLogo from '../images/logo2.png'; 
 import '../css/style.css';
+import HomeScreen from './home_screen.js';
 
 
 
@@ -77,10 +79,11 @@ class MainScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            currentTab: 'dirlayout',
+            currentTab: 'home',
             showBadge: false
         };
         this.handleTabClick = this.handleTabClick.bind(this);
+        this.change_tab = this.change_tab.bind(this);
     }
     /*
     * Event for switching tabs
@@ -120,6 +123,11 @@ class MainScreen extends React.Component {
                 // TODO : Show the error message.
             });
     }
+    change_tab(tab_name) {
+        this.setState({
+            currentTab: tab_name
+        })
+    }
     /*
     * Render main screen
     */
@@ -133,40 +141,42 @@ class MainScreen extends React.Component {
             <Grid container style={{backgroundColor: '#ffffff', height: '150px', flexGrow: 1, overflow: 'hidden'}} justify="center">
                 <Grid item xs={12}>
                     <Grid container justify="center" alignItems="center" style={{height: '100%'}}>
-                        <Grid item>
-                           
-						   <img src={solarSpellLogo} className="spellLogo" />
-                        </Grid>
-						
-
-								<Tabs
-									value={currentTab}
-									TabIndicatorProps={{style: {backgroundColor: '#75B2DD', height: '5px', borderRadius: '5px'}}}
-									onChange={this.handleTabClick}
-									centered
-									indicatorColor="secondary"
-									/* classes={{
-										indicator: classes.indicator
-									}} */
-								>
-									<Tab className = {classes.indicator} value="tags" label="Metadata" />
-									<Tab className = {classes.indicator} value="contents" label="Contents" />
-									<Tab className = {classes.indicator} value="dirlayout" label="Library Versions" />
-									<Tab className = {classes.indicator} value="images" label="SolarSPELL Images" />
-									{ this.state.showBadge ? (<Tab className = {classes.indicator} value="sysinfo" label= {
-															<Badge className= {classes.padding} color="secondary" badgeContent={'!'}>
-															System Info
-															</Badge>
-														}/>) : (<Tab className = {classes.indicator} value="sysinfo" label="System Info" />)
-									}
-								</Tabs>
-
+                        <Tabs
+                            value={currentTab}
+                            TabIndicatorProps={{style: {backgroundColor: '#75B2DD', height: '5px', borderRadius: '5px'}}}
+                            onChange={this.handleTabClick}
+                            centered
+                            indicatorColor="secondary"
+                        >
+                            <Tab className={classes.indicator} value="home" label={<img src={solarSpellLogo} className="spellLogo" />} />
+                            <Tab className={classes.indicator} value="tags" label="Metadata" />
+                            <Tab className={classes.indicator} value="contents" label="Contents" />
+                            <Tab className={classes.indicator} value="dirlayout" label="Library Versions" />
+                            <Tab className={classes.indicator} value="images" label="SolarSPELL Images" />
+                            {
+                                this.state.showBadge ?
+                                (
+                                    <Tab
+                                        className={classes.indicator}
+                                        value="sysinfo"
+                                        label={
+                                            <Badge className= {classes.padding} color="secondary" badgeContent={'!'}>
+                                                System Info
+                                            </Badge>
+                                        }
+                                    />
+                                ) : (
+                                    <Tab className={classes.indicator} value="sysinfo" label="System Info" />
+                                )
+                            }
+                        </Tabs>
                     </Grid>
                 </Grid>
             </Grid>
             
             <Grid container style={{marginTop: '20px'}}>
                 <Grid item xs={12}>
+                    {currentTab == 'home' && <HomeScreen change_tab={this.change_tab} />}
                     {currentTab == 'dirlayout' && <DirectoryLayoutComponent />}
                     {currentTab == 'contents' && <ContentManagement />}
                     {currentTab == 'tags' && <TagManagementComponent/>}

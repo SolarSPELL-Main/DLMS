@@ -48,6 +48,7 @@ class DirectoryInfoBoard extends React.Component {
             workareas: labels['workareas'],
             languages: labels['languages'],
             catalogers: labels['catalogers'],
+            collections: labels['collections'],
             creatorsNeedAll: (props.boardData.creatorsNeedAll ? 'All' : 'Any'),
             coveragesNeedAll: (props.boardData.coveragesNeedAll ? 'All' : 'Any'),
             subjectsNeedAll: (props.boardData.subjectsNeedAll ? 'All' : 'Any'),
@@ -55,6 +56,7 @@ class DirectoryInfoBoard extends React.Component {
             workareasNeedAll: (props.boardData.workareasNeedAll ? 'All' : 'Any'),
             languagesNeedAll: (props.boardData.languagesNeedAll ? 'All' : 'Any'),
             catalogersNeedAll: (props.boardData.catalogersNeedAll ? 'All' : 'Any'),
+            collectionsNeedAll: (props.boardData.collectionsNeedAll ? 'All' : 'Any'),
             selectedFiles: props.boardData.individualFiles,
             confirmDelete: false,
             labels: labels,
@@ -83,7 +85,7 @@ class DirectoryInfoBoard extends React.Component {
     /*
     * Build a map containing tag ids
     */
-    buildTagIdTagsMap(tags) {
+    buildTagIdTagsMap(tags = {}) {
         // Builds a map of <Tag Id> - Tag map for each tag type.
         const tagIdTagMap = {};
         Object.keys(tags).forEach(eachTagType => {
@@ -94,7 +96,7 @@ class DirectoryInfoBoard extends React.Component {
     /*
     * Build a map containing tag names
     */
-    buildTagNameTagMap(tags) {
+    buildTagNameTagMap(tags = {}) {
         const tagNameTagMap = {};
         Object.keys(tags).forEach(eachTagType => {
             tagNameTagMap[eachTagType] = buildMapFromArray(tags[eachTagType], 'name');
@@ -155,6 +157,7 @@ class DirectoryInfoBoard extends React.Component {
             workareas: labels['workareas'],
             languages: labels['languages'],
             catalogers: labels['catalogers'],
+            collections: labels['collections'],
             creatorsNeedAll: (props.boardData.creatorsNeedAll ? 'All' : 'Any'),
             coveragesNeedAll: (props.boardData.coveragesNeedAll ? 'All' : 'Any'),
             subjectsNeedAll: (props.boardData.subjectsNeedAll ? 'All' : 'Any'),
@@ -162,6 +165,7 @@ class DirectoryInfoBoard extends React.Component {
             workareasNeedAll: (props.boardData.workareasNeedAll ? 'All' : 'Any'),
             languagesNeedAll: (props.boardData.languagesNeedAll ? 'All' : 'Any'),
             catalogersNeedAll: (props.boardData.catalogersNeedAll ? 'All' : 'Any'),
+            collectionsNeedAll: (props.boardData.collectionsNeedAll ? 'All' : 'Any'),
             selectedFiles: props.boardData.individualFiles,
             confirmDelete: false,
             fieldErrors: {}
@@ -207,6 +211,7 @@ class DirectoryInfoBoard extends React.Component {
         selectedTags['creators'].forEach(creator => {payload.append('creators', creator)});
         selectedTags['coverages'].forEach(coverage => {payload.append('coverages', coverage)});
         selectedTags['subjects'].forEach(subject => {payload.append('subjects', subject)});
+        selectedTags['collections'].forEach(collection => {payload.append('collections', collection)});
         selectedTags['keywords'].forEach(keyword => {payload.append('keywords', keyword)});
         selectedTags['workareas'].forEach(workarea => {payload.append('workareas', workarea)});
         selectedTags['languages'].forEach(language => {payload.append('languages', language)});
@@ -214,6 +219,7 @@ class DirectoryInfoBoard extends React.Component {
         payload.append('creators_need_all', (this.state.creatorsNeedAll === 'All'));
         payload.append('coverages_need_all', (this.state.coveragesNeedAll === 'All'));
         payload.append('subjects_need_all', (this.state.subjectsNeedAll === 'All'));
+        payload.append('collections_need_all', (this.state.collectionsNeedAll === 'All'));
         payload.append('keywords_need_all', (this.state.keywordsNeedAll === 'All'));
         payload.append('workareas_need_all', (this.state.workareasNeedAll === 'All'));
         payload.append('languages_need_all', (this.state.languagesNeedAll === 'All'));
@@ -337,6 +343,7 @@ class DirectoryInfoBoard extends React.Component {
     handleChipAddition(addedChip, tagType) {
         this.setState((prevState, props) => {
             const selectedTags = prevState[tagType];
+            console.log(addedChips)
             selectedTags.push(addedChip.name);
             return {[tagType]: selectedTags};
         });
@@ -529,6 +536,28 @@ class DirectoryInfoBoard extends React.Component {
                         <Grid item xs={3}>
                             <Select
                                 fullWidth
+                                value={this.state.collectionsNeedAll}
+                                displayEmpty
+                                name="collections-operator"
+                                onChange={evt => this.handleOperatorChange(evt, 'collectionsNeedAll')}
+                            >
+                                <MenuItem value="All">All of the Collections</MenuItem>
+                                <MenuItem value="Any">Any of the Collections</MenuItem>
+                            </Select>
+                        </Grid>
+                        <Grid item xs={8}>
+                            <AutoCompleteWithChips suggestions={this.props.tags['collections']}
+                                selectedItem={this.state.collections}
+                                onAddition={addedTag => {this.handleChipAddition(addedTag, 'collections')}}
+                                onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'collections')}}
+                                required={true}
+                                errorMsg={this.state.fieldErrors.selectedTags} />
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={3}>
+                        <Grid item xs={3}>
+                            <Select
+                                fullWidth
                                 value={this.state.keywordsNeedAll}
                                 displayEmpty
                                 name="keywords-operator"
@@ -625,7 +654,7 @@ class DirectoryInfoBoard extends React.Component {
                     }
 
                     <div style={{marginTop: '40px'}}></div>
-                    <FileSelectionComponent allFiles={this.allFiles} tagIdsTagsMap={this.tagIdsTagsMap}
+                    <FileSelectionComponent allFiles={this.props.allFiles} tagIdsTagsMap={this.tagIdsTagsMap}
                         selectedFiles={this.state.selectedFiles} fileIdFileMap={this.fileIdFileMap}
                         onFileSelect={this.fileSelectionCallback} onFileDeselect={this.fileDeselectionCallback}
                         tags={this.props.tags}

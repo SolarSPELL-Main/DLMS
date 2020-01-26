@@ -214,6 +214,12 @@ class FileListComponent extends React.Component {
                             confirmDelete: true
                         })
                     }}
+                    viewFn={evt => {
+                        this.setState({
+                            selectedFile: row,
+                            contentDialogOpen: true
+                        })
+                    }}
                     setActive={new_active => {
                         const payload = new FormData()
                         payload.append('active', new_active ? 1 : 0)
@@ -226,15 +232,16 @@ class FileListComponent extends React.Component {
                 />
             )},
             {name: 'name', title: 'Name', filterType: 'textfield'},
-            {name: 'description', title: 'Description', filterType: 'textfield'},
-            {name: 'updated_time', title: 'Updated on', filterType: 'textfield'},
+            {name: 'original_file_name', title: 'Filename', filterType: 'textfield'},
             {name: 'creators', title: 'Creators', filterType: 'autocomplete', tagKey: 'creators'},
-            {name: 'coverage', title: 'Coverage', filterType: 'autocomplete', tagKey: 'coverages'},
-            {name: 'subjects', title: 'Subjects', filterType: 'autocomplete', tagKey: 'subjects'},
-            {name: 'keywords', title: 'Keywords', filterType: 'autocomplete', tagKey: 'keywords'},
-            {name: 'workareas', title: 'Workareas', filterType: 'autocomplete', tagKey: 'workareas'},
+            {name: 'updated_time', title: 'Updated on', filterType: 'textfield', placeholder: "MM/DD/YYYY-MM/DD/YYYY"},
+            {name: 'description', title: 'Description', filterType: 'textfield'},
             {name: 'language', title: 'Language', filterType: 'autocomplete', tagKey: 'languages'},
-            {name: 'cataloger', title: 'Cataloger', filterType: 'autocomplete', tagKey: 'catalogers'},
+            //TODO: Add Collection Type and Resource Type column + filter
+            //TODO: fix date filter
+            {name: 'subjects', title: 'Subjects', filterType: 'autocomplete', tagKey: 'subjects'},
+            {name: 'collections', title: 'Collections', filterType: 'autocomplete', tagKey: 'collections'},
+            {name: 'keywords', title: 'Keywords', filterType: 'autocomplete', tagKey: 'keywords'},
             {name: 'active', title: 'Active', filterType: 'boolean', getCellValue: row => row.active == 1 ? <CheckCircleOutline /> : <HighlightOff />}
         ];
         this.deleteCallback = props.onDelete;
@@ -253,6 +260,7 @@ class FileListComponent extends React.Component {
             {columnName: 'workareas', predicate: filterThroughArray},
             {columnName: 'language', predicate: filterThroughArray},
             {columnName: 'cataloger', predicate: filterThroughArray},
+            {columnName: 'collections', predicate: filterThroughArray}
         ];
         this.setCurrentPage = this.setCurrentPage.bind(this)
         this.setPageSize = this.setPageSize.bind(this)
@@ -313,10 +321,6 @@ class FileListComponent extends React.Component {
         return(
             <tr
                 onContextMenu={evt => this.handleFilesRightClick(evt, row, menuName)}
-                onMouseUp={evt => this.setState({
-                    contentDialogOpen: true,
-                    selectedFile: row
-                })}
             >
                 {children}
             </tr>
@@ -387,7 +391,7 @@ class FileListComponent extends React.Component {
                         <Input
                             fullWidth
                             value={filter ? filter.value : ''}
-                            placeholder='Filter...'
+                            placeholder={column.placeholder == null ? 'Filter...' : column.placeholder}
                             onChange={evt => onFilter(evt.target.value ? { value: evt.target.value } : null)}
                         />
                     </TableCell>
@@ -422,7 +426,7 @@ class FileListComponent extends React.Component {
                     columns={this.columns}
 					style={{color: '#3592BE'}}
                 >
-                    <ChippedTagsTypeProvider for={['creators', 'coverage', 'subjects', 'keywords', 'workareas', 'language', 'cataloger']} />
+                    <ChippedTagsTypeProvider for={['creators', 'coverage', 'subjects', 'keywords', 'workareas', 'language', 'cataloger', 'collections']} />
                     <FilteringState
                         defaultFilters={[]}
                         columnExtensions={[{columnName: 'content_file', filteringEnabled: false}]}
@@ -447,16 +451,15 @@ class FileListComponent extends React.Component {
                         defaultColumnWidths={[
                             { columnName: 'actions', width: 150},
                             { columnName: 'name', width: 150 },
-                            { columnName: 'description', width: 300 },
+                            { columnName: 'original_file_name', width: 150 },
                             { columnName: 'creators', width: 130 },
-                            { columnName: 'coverage', width: 130 },
-                            { columnName: 'subjects', width: 130 },
-                            { columnName: 'keywords', width: 130 },
-                            { columnName: 'workareas', width: 130 },
+                            { columnName: 'updated_time', width: 150 },
+                            { columnName: 'description', width: 130 },
                             { columnName: 'language', width: 130 },
-                            { columnName: 'cataloger', width: 130 },
-                            { columnName: 'updated_time', width: 130 },
-                            { columnName: 'active', width: 130 }
+                            { columnName: 'subjects', width: 130 },
+                            { columnName: 'collections', width: 130 },
+                            { columnName: 'keywords', width: 130 },
+                            { columnName: 'active', width: 100 },
                         ]} />
                     <TableHeaderRow cellComponent={CustomTableHeaderCell} showSortingControls />
 					<Toolbar rootComponent={ToolbarRoot} />
@@ -544,6 +547,12 @@ class FileListComponent extends React.Component {
                                 selectedFile={this.state.selectedFile}
                             />
                             <FileInfoEntry
+                                name="Collections"
+                                property="collections"
+                                displayFn={ids => ids.map(id => this.props.tagIdsTagsMap["collections"][id].name).join(", ")}
+                                selectedFile={this.state.selectedFile}
+                            />
+                            <FileInfoEntry
                                 name="Keywords"
                                 property="keywords"
                                 displayFn={ids => ids.map(id => this.props.tagIdsTagsMap["keywords"][id].name).join(", ")}
@@ -572,6 +581,12 @@ class FileListComponent extends React.Component {
                                 name="Active"
                                 property="active"
                                 displayFn={active => active == 1 ? <CheckCircleOutline /> : <HighlightOff />}
+                                selectedFile={this.state.selectedFile}
+                            />
+                            <FileInfoEntry
+                                name="Preview"
+                                property="content_file"
+                                displayFn={url => <a href={url} target="_blank">Click to preview file</a>}
                                 selectedFile={this.state.selectedFile}
                             />
                         </DialogContentText>

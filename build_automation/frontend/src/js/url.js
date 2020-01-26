@@ -16,6 +16,8 @@ const APP_URLS = {
     CREATORS_DETAIL: (id) => `/api/creators/${id}/`,
     COVERAGES_LIST: '/api/coverages/',
     COVERAGES_DETAIL: (id) => `/api/coverages/${id}/`,
+    COLLECTIONS_LIST: '/api/collections/',
+    COLLECTIONS_DETAIL: (id) => `/api/collections/${id}/`,
     SUBJECTS_LIST: '/api/subjects/',
     SUBJECTS_DETAIL: (id) => `/api/subjects/${id}/`,
     KEYWORDS_LIST: '/api/keywords/',
@@ -39,7 +41,7 @@ const get_pagination_query = (page=0, size=10) => `?page=${page}&size=${size}`
 
 const FILTER_PARAMS = {
     CONTENTS: {
-        'name': 'icontains',
+        'name': ['icontains'],
         'description': ['icontains'],
         'updated_time': ['gte', 'lte'],
         'creators': ['in'],
@@ -49,6 +51,7 @@ const FILTER_PARAMS = {
         'workareas': ['in'],
         'language': ['in'],
         'cataloger': ['in'],
+        'collections': ['in'],
         'active': [null]
     }
 }
@@ -58,13 +61,12 @@ const get_filter_param = (name, op, value) => `${name}${op ? "__" + op : ""}=${e
 //Takes a devexpress grid filter array and turns it into a string that can be appended to a pagination url
 const get_filter_query = (filters, viewset_params) => {
     return filters.map(filter => {
-        const name = filter.columnName
-        const val = filter.value
+        const { name, val } = filter
         const operations = viewset_params[name]
         if (isEqual(operations, ['in'])) {
             return get_filter_param(name, operations[0], val.join(","))
         } else if (isEqual(operations, ['lte', 'gte'])) {
-            //Turns filter.value == '12/19/2019-12/21/2019' into dates == ['12-19-2019', '12-19-2019']
+            //Turns filter.value == '12/19/2019-12/21/2019' into dates == ['12-19-2019', '12-21-2019']
             const dates = val.split("-").map(date => date.replace(/\//g, '-'))
             return dates.length !== 2 ? null : operations.map((op, idx) => get_filter_param(name, op, dates[idx])).join("&")
         } else if (name == "active") {

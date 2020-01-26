@@ -283,6 +283,7 @@ class LibraryVersionBuildUtil:
         workareas = directory.workareas.all()
         languages = directory.languages.all()
         catalogers = directory.catalogers.all()
+        collections = directory.collections.all()
 
         metadata_filter_criteria = None
         metadata_filter_criteria = self.__add_metadata_to_filter(
@@ -327,6 +328,12 @@ class LibraryVersionBuildUtil:
             'cataloger',
             metadata_filter_criteria,
             directory.catalogers_need_all,
+        )
+        metadata_filter_criteria = self.__add_metadata_to_filter(
+            collections,
+            'collection',
+            metadata_filter_criteria,
+            directory.collections_need_all,
         )
         return metadata_filter_criteria
 

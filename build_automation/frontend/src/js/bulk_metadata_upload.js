@@ -53,6 +53,7 @@ class BulkMetadataUpload extends React.Component {
             workareas: props.content.workareas,
             languages: props.content.languages,
             catalogers: props.content.catalogers,
+            collections: props.content.collections,
             //fieldErrors: {},
             selectedDate: props.content.updatedDate,
             source: props.content.source,
@@ -198,6 +199,13 @@ class BulkMetadataUpload extends React.Component {
                                       
                                       }
                                    }
+                                    for (var x = 0; x < currInstance.props.allTags.collections; x++){
+                                        if (parsed[i]["Collection"] == currInstance.props.allTags.collections[x].name) {
+                                        console.log("collection: " + currInstance.props.allTags.collections[x].name);
+                                        payload.append('collection', currInstance.props.allTags.collections[x].id);
+                                        
+                                        }
+                                    }
                                     ////payload.append('subjects', parsed[i]["Subject"]);
                                     //payload.append('language', currInstance.props.language);
                                     //payload.append('cataloger', parsed[i]["Cataloger"]);

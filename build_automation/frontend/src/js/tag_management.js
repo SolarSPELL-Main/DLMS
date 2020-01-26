@@ -117,46 +117,97 @@ class TagManagementComponent extends React.Component {
             creatorColumns: [
                 { name: 'actions', title: 'Actions', getCellValue: this.getActionPanel},
                 { name: 'name', title: 'Name' },
-                { name: 'description', title: 'Description' },
             ],
             creatorRows: [],
             keywordColumns: [
                 { name: 'actions', title: 'Actions', getCellValue: this.getActionPanel},
                 { name: 'name', title: 'Name' },
-                { name: 'description', title: 'Description' }
             ],
             keywordRows: [],
             coverageColumns: [
                 { name: 'actions', title: 'Actions', getCellValue: this.getActionPanel},
                 { name: 'name', title: 'Name' },
-                { name: 'description', title: 'Description' }
             ],
             coverageRows: [],
+            collectionColumns: [
+                { name: 'actions', title: 'Actions', getCellValue: this.getActionPanel},
+                { name: 'name', title: 'Name' },
+            ],
+            collectionColumns: [],
             subjectColumns: [
                 { name: 'actions', title: 'Actions', getCellValue: this.getActionPanel},
                 { name: 'name', title: 'Name' },
-                { name: 'description', title: 'Description' },
             ],
             subjectRows: [],
             workareaColumns: [
                 { name: 'actions', title: 'Actions', getCellValue: this.getActionPanel},
                 { name: 'name', title: 'Name' },
-                { name: 'description', title: 'Description' },
             ],
             workareaRows: [],
             languageColumns: [
                 { name: 'actions', title: 'Actions', getCellValue: this.getActionPanel},
                 { name: 'name', title: 'Name' },
-                { name: 'description', title: 'Description' },
             ],
             languageRows: [],
             catalogerColumns: [
                 { name: 'actions', title: 'Actions', getCellValue: this.getActionPanel},
                 { name: 'name', title: 'Name' },
-                { name: 'description', title: 'Description' },
             ],
-            catalogerRows: []
+            catalogerRows: [],
+            collectionColumns: [
+                { name: 'actions', title: 'Actions', getCellValue: this.getActionPanel},
+                { name: 'name', title: 'Name' },
+            ],
+            collectionRows: [],
         };
+        this.metadataItems = {
+            creator: {
+                detail_url: APP_URLS.CREATORS_DETAIL,
+                list_url: APP_URLS.CREATORS_LIST,
+                display_plural: "Creators",
+            },
+            coverage: {
+                detail_url: APP_URLS.COVERAGES_DETAIL,
+                list_url: APP_URLS.COVERAGES_LIST,
+                display_plural: "Coverages",
+            },
+            subject: {
+                detail_url: APP_URLS.SUBJECTS_DETAIL,
+                list_url: APP_URLS.SUBJECTS_LIST,
+                display_plural: "Subjects",
+            },
+            keyword: {
+                detail_url: APP_URLS.KEYWORDS_DETAIL,
+                list_url: APP_URLS.KEYWORDS_LIST,
+                display_plural: "Keywords",
+            },
+            workarea: {
+                detail_url: APP_URLS.WORKAREAS_DETAIL,
+                list_url: APP_URLS.WORKAREAS_LIST,
+                display_plural: "Workareas",
+            },
+            language: {
+                detail_url: APP_URLS.LANGUAGES_DETAIL,
+                list_url: APP_URLS.LANGUAGES_LIST,
+                display_plural: "Languages",
+            },
+            cataloger: {
+                detail_url: APP_URLS.CATALOGERS_DETAIL,
+                list_url: APP_URLS.CATALOGERS_LIST,
+                display_plural: "Catalogers",
+            },
+            collection: {
+                detail_url: APP_URLS.COLLECTIONS_DETAIL,
+                list_url: APP_URLS.COLLECTIONS_LIST,
+                display_plural: "Collections",
+            }
+        }
+        this.columns = [
+            { name: 'actions', title: 'Actions', getCellValue: this.getActionPanel},
+            { name: 'name', title: 'Name' },
+        ]
+        this.pageSizes = [5, 10, 20]
+
         this.handleChange = this.handleChange.bind(this);
         this.setCurrentView = this.setCurrentView.bind(this);
         this.setUrls = this.setUrls.bind(this);
@@ -177,7 +228,9 @@ class TagManagementComponent extends React.Component {
         return (
             <ActionPanel
                 editFn={evt => {
-                    this.setState({selectedTag: row}, this.handleTagEdit)
+                    this.setState({
+                        selectedTag: row
+                    }, this.handleTagEdit)
                 }}
                 deleteFn={evt => {
                     this.setState({
@@ -280,6 +333,7 @@ class TagManagementComponent extends React.Component {
                 creatorRows: response['creators'],
                 keywordRows: response['keywords'],
                 subjectRows: response['subjects'],
+                collectionRows: response['collections'],
                 coverageRows: response['coverages'],
                 workareaRows: response['workareas'],
                 languageRows: response['languages'],
@@ -401,9 +455,9 @@ class TagManagementComponent extends React.Component {
     handleTagEdit() {
         const selectedTag = this.state.selectedTag;
         
-        const currentInstance = this;
         this.setState({
             currentView: 'addTag',
+            currentTitle: this.metadataItems[this.state.currentPanel].display_plural,
             selectedTag: {
                 id: selectedTag.id,
                 name: selectedTag.name,
@@ -415,6 +469,44 @@ class TagManagementComponent extends React.Component {
     * Render the metadata page
     */
     render() {
+        const panels = Object.entries(this.metadataItems).map((entry) => {
+            const [name, data] = entry
+            const {
+                detail_url,
+                list_url,
+                display_plural
+            } = data
+            return (
+                <ExpansionPanel key={name} expanded={this.state.expanded === name} onChange={this.handleChange(name)} onClick={e => { this.handleAccordionClick(name) }}>
+                    <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} onClick={e => { this.setUrls(list_url, detail_url) }}>
+                        <Typography variant="h6" color="primary" className={styles.paragraph}>{display_plural}</Typography>
+                    </ExpansionPanelSummary>
+                    <ExpansionPanelDetails>
+                        <Grid container>
+                            <Grid item>
+                                <Button variant="contained" color="primary" onClick={e => { this.addNewTag(display_plural) }}>
+                                    Add New
+                                </Button>
+                            </Grid>
+                            <DataGrid
+                                rows={this.state[name + "Rows"]}
+                                columns={this.state[name + "Columns"]}
+                            >
+                                <FilteringState defaultFilters={[]} columnExtensions={[{ columnName: 'name', filteringEnabled: true }]} />
+                                <IntegratedFiltering />
+                                <PagingState defaultCurrentPage={0} defaultPageSize={10} />
+                                <IntegratedPaging />
+                                <Table rowComponent={obj => { return this.tableRowComponent(obj, 'selectedTagsMenu') }} />
+                                <TableHeaderRow />
+                                <TableFilterRow />
+                                <PagingPanel pageSizes={this.pageSizes} />
+                            </DataGrid>
+                        </Grid>
+                    </ExpansionPanelDetails>
+                </ExpansionPanel>
+            )
+        })
+
         return (
 		<MuiThemeProvider theme={theme}>
             <Grid container spacing={0}>
@@ -428,194 +520,9 @@ class TagManagementComponent extends React.Component {
 					
                     <Grid container spacing={0}>
                         <Grid item xs={12}>
-                            <ExpansionPanel expanded={this.state.expanded === 'creator'} onChange={this.handleChange('creator')} onClick={e => { this.handleAccordionClick('creator') }}>
-                                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} onClick={e => { this.setUrls(APP_URLS.CREATORS_LIST, APP_URLS.CREATORS_DETAIL) }}>
-                                    <Typography variant="h6" color="primary" className={styles.paragraph}>Creators</Typography>
-                                </ExpansionPanelSummary>
-                                <ExpansionPanelDetails>
-                                    <Grid container>
-                                        <Grid item>
-
-                                        </Grid>
-                                        <DataGrid
-                                            rows={this.state.creatorRows}
-                                            columns={this.state.creatorColumns}
-                                        >
-                                            <FilteringState defaultFilters={[]} columnExtensions={[{ columnName: 'name', filteringEnabled: true }]} />
-                                            <IntegratedFiltering />
-                                            <PagingState defaultCurrentPage={0} defaultPageSize={10} />
-                                            <IntegratedPaging />
-                                            <Table rowComponent={obj => { return this.tableRowComponent(obj, 'selectedTagsMenu') }} />
-                                            <TableHeaderRow />
-                                            <TableFilterRow />
-                                            <PagingPanel pageSizes={[5, 10, 20]} />
-
-                                        </DataGrid>
-                                    </Grid>
-                                </ExpansionPanelDetails>
-                            </ExpansionPanel>
-                            <ExpansionPanel expanded={this.state.expanded === 'coverage'} onChange={this.handleChange('coverage')} onClick={e => { this.handleAccordionClick('coverage') }}>
-                                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} onClick={e => { this.setUrls(APP_URLS.COVERAGES_LIST, APP_URLS.COVERAGES_DETAIL) }}>
-                                    <Typography variant="h6" color="primary" className={styles.paragraph}>Coverages</Typography>
-                                </ExpansionPanelSummary>
-                                <ExpansionPanelDetails>
-                                    <Grid container>
-                                        <Grid item>
-                                            <Button variant="contained" color="primary" onClick={e => { this.addNewTag('Coverages') }}>
-                                                Add New
-            </Button>
-                                        </Grid>
-                                        <DataGrid
-                                            rows={this.state.coverageRows}
-                                            columns={this.state.coverageColumns}
-                                        >
-                                            <FilteringState defaultFilters={[]} columnExtensions={[{ columnName: 'name', filteringEnabled: true }]} />
-                                            <IntegratedFiltering />
-                                            <PagingState defaultCurrentPage={0} defaultPageSize={10} />
-                                            <IntegratedPaging />
-                                            <Table rowComponent={obj => { return this.tableRowComponent(obj, 'selectedTagsMenu') }} />
-                                            <TableHeaderRow />
-
-
-                                            <TableFilterRow />
-                                            <PagingPanel pageSizes={[5, 10, 20]} />
-                                        </DataGrid>
-                                    </Grid>
-                                </ExpansionPanelDetails>
-                            </ExpansionPanel>
-                            <ExpansionPanel expanded={this.state.expanded === 'subject'} onChange={this.handleChange('subject')} onClick={e => { this.handleAccordionClick('subject') }}>
-                                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} onClick={e => { this.setUrls(APP_URLS.SUBJECTS_LIST, APP_URLS.SUBJECTS_DETAIL) }}>
-                                    <Typography variant="h6" color="primary" className={styles.paragraph}>Subjects</Typography>
-                                </ExpansionPanelSummary>
-                                <ExpansionPanelDetails>
-                                    <Grid container>
-                                        <Grid item>
-                                            <Button variant="contained" color="primary" onClick={e => { this.addNewTag('Subjects') }}>
-                                                Add New
-            </Button>
-                                        </Grid>
-                                        <DataGrid
-                                            rows={this.state.subjectRows}
-                                            columns={this.state.subjectColumns}
-                                        >
-                                            <FilteringState defaultFilters={[]} columnExtensions={[{ columnName: 'name', filteringEnabled: true }]} />
-                                            <IntegratedFiltering />
-                                            <PagingState defaultCurrentPage={0} defaultPageSize={10} />
-                                            <IntegratedPaging />
-                                            <Table rowComponent={obj => { return this.tableRowComponent(obj, 'selectedTagsMenu') }} />
-                                            <TableHeaderRow />
-                                            <TableFilterRow />
-                                            <PagingPanel pageSizes={[5, 10, 20]} />
-                                        </DataGrid>
-                                    </Grid>
-                                </ExpansionPanelDetails>
-                            </ExpansionPanel>
-                            <ExpansionPanel expanded={this.state.expanded === 'keyword'} onChange={this.handleChange('keyword')} onClick={e => { this.handleAccordionClick('keyword') }}>
-                                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} onClick={e => { this.setUrls(APP_URLS.KEYWORDS_LIST, APP_URLS.KEYWORDS_DETAIL) }}>
-                                    <Typography variant="h6" color="primary" className={styles.paragraph}>Keywords</Typography>
-                                </ExpansionPanelSummary>
-                                <ExpansionPanelDetails>
-                                    <Grid container>
-                                        <Grid item>
-
-                                        </Grid>
-                                        <DataGrid
-                                            rows={this.state.keywordRows}
-                                            columns={this.state.keywordColumns}
-                                        >
-                                            <FilteringState defaultFilters={[]} columnExtensions={[{ columnName: 'name', filteringEnabled: true }]} />
-                                            <IntegratedFiltering />
-                                            <PagingState defaultCurrentPage={0} defaultPageSize={10} />
-                                            <IntegratedPaging />
-                                            <Table rowComponent={obj => { return this.tableRowComponent(obj, 'selectedTagsMenu') }} />
-                                            <TableHeaderRow />
-                                            <TableFilterRow />
-                                            <PagingPanel pageSizes={[5, 10, 20]} />
-
-                                        </DataGrid>
-                                    </Grid>
-                                </ExpansionPanelDetails>
-                            </ExpansionPanel>
-                            <ExpansionPanel expanded={this.state.expanded === 'workarea'} onChange={this.handleChange('workarea')} onClick={e => { this.handleAccordionClick('workarea') }}>
-                                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} onClick={e => { this.setUrls(APP_URLS.WORKAREAS_LIST, APP_URLS.WORKAREAS_DETAIL) }}>
-                                    <Typography variant="h6" color="primary" className={styles.paragraph}>Work Areas</Typography>
-                                </ExpansionPanelSummary>
-                                <ExpansionPanelDetails>
-                                    <Grid container>
-                                        <Grid item>
-                                            <Button variant="contained" color="primary" onClick={e => { this.addNewTag('Work Areas') }}>
-                                                Add New
-            </Button>
-                                        </Grid>
-                                        <DataGrid
-                                            rows={this.state.workareaRows}
-                                            columns={this.state.workareaColumns}
-                                        >
-                                            <FilteringState defaultFilters={[]} columnExtensions={[{ columnName: 'name', filteringEnabled: true }]} />
-                                            <IntegratedFiltering />
-                                            <PagingState defaultCurrentPage={0} defaultPageSize={10} />
-                                            <IntegratedPaging />
-                                            <Table rowComponent={obj => { return this.tableRowComponent(obj, 'selectedTagsMenu') }} />
-                                            <TableHeaderRow />
-                                            <TableFilterRow />
-                                            <PagingPanel pageSizes={[5, 10, 20]} />
-                                        </DataGrid>
-                                    </Grid>
-                                </ExpansionPanelDetails>
-                            </ExpansionPanel>
-                            <ExpansionPanel expanded={this.state.expanded === 'language'} onChange={this.handleChange('language')} onClick={e => { this.handleAccordionClick('language') }}>
-                                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} onClick={e => { this.setUrls(APP_URLS.LANGUAGES_LIST, APP_URLS.LANGUAGES_DETAIL)}}>
-                                    <Typography variant="h6" color="primary" className={styles.paragraph}>Languages</Typography>
-                                </ExpansionPanelSummary>
-                                <ExpansionPanelDetails>
-                                    <Grid container>
-                                        <Grid item>
-                                            <Button variant="contained" color="primary" onClick={e => { this.addNewTag('Languages') }}>
-                                                Add New
-            </Button>
-                                        </Grid>
-                                        <DataGrid
-                                            rows={this.state.languageRows}
-                                            columns={this.state.languageColumns}
-                                        >
-                                            <FilteringState defaultFilters={[]} columnExtensions={[{ columnName: 'name', filteringEnabled: true }]} />
-                                            <IntegratedFiltering />
-                                            <PagingState defaultCurrentPage={0} defaultPageSize={10} />
-                                            <IntegratedPaging />
-                                            <Table rowComponent={obj => { return this.tableRowComponent(obj, 'selectedTagsMenu') }} />
-                                            <TableHeaderRow />
-                                            <TableFilterRow />
-                                            <PagingPanel pageSizes={[5, 10, 20]} />
-                                        </DataGrid>
-                                    </Grid>
-                                </ExpansionPanelDetails>
-                            </ExpansionPanel>
-                            <ExpansionPanel expanded={this.state.expanded === 'cataloger'} onChange={this.handleChange('cataloger')} onClick={e => { this.handleAccordionClick('cataloger') }}>
-                                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} onClick={e => { this.setUrls(APP_URLS.CATALOGERS_LIST, APP_URLS.CATALOGERS_DETAIL) }}>
-                                    <Typography variant="h6" color="primary" className={styles.paragraph}>Catalogers</Typography>
-                                </ExpansionPanelSummary>
-                                <ExpansionPanelDetails>
-                                    <Grid container>
-                                        <Grid item><Button variant="contained" color="primary" onClick={e => { this.addNewTag('Catalogers') }}>
-                                            Add New
-            </Button>
-                                        </Grid>
-                                        <DataGrid
-                                            rows={this.state.catalogerRows}
-                                            columns={this.state.catalogerColumns}
-                                        >
-                                            <FilteringState defaultFilters={[]} columnExtensions={[{ columnName: 'name', filteringEnabled: true }]} />
-                                            <IntegratedFiltering />
-                                            <PagingState defaultCurrentPage={0} defaultPageSize={10} />
-                                            <IntegratedPaging />
-                                            <Table rowComponent={obj => { return this.tableRowComponent(obj, 'selectedTagsMenu') }} />
-                                            <TableHeaderRow />
-                                            <TableFilterRow />
-                                            <PagingPanel pageSizes={[5, 10, 20]} />
-                                        </DataGrid>
-                                    </Grid>
-                                </ExpansionPanelDetails>
-                            </ExpansionPanel>
+                            {
+                                panels
+                            }
                             <Menu
                                 id="selected-tags-menu"
                                 anchorPosition={this.state.selectedTagsMenu.AnchorPos}

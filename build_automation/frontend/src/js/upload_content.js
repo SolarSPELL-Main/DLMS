@@ -52,6 +52,7 @@ class UploadContent extends React.Component{
             workareas: labels.workareas,
             languages: labels.languages,
             catalogers: labels.catalogers,
+            collections: labels.collections,
             fieldErrors: {},
             selectedDate: props.content.updatedDate,
             source: props.content.source,
@@ -72,6 +73,7 @@ class UploadContent extends React.Component{
         this.handleWorkareaAddition=this.handleWorkareaAddition.bind(this);
         this.handleLanguageAddition=this.handleLanguageAddition.bind(this);
         this.handleCatalogerAddition=this.handleCatalogerAddition.bind(this);
+        this.handleCollectionAddition=this.handleCollectionAddition.bind(this);
         this.handleTagDeletion=this.handleTagDeletion.bind(this);
         this.handleCreatorDeletion=this.handleCreatorDeletion.bind(this);
         this.handleCoverageDeletion=this.handleCoverageDeletion.bind(this);
@@ -81,6 +83,7 @@ class UploadContent extends React.Component{
         this.handleLanguageDeletion=this.handleLanguageDeletion.bind(this);
         this.handleCatalogerDeletion=this.handleCatalogerDeletion.bind(this);
         this.handleFileSelection=this.handleFileSelection.bind(this);
+        this.handleCollectionDeletion=this.handleCollectionDeletion.bind(this)
         this.saveContent=this.saveContent.bind(this);
         this.saveTag=this.saveTag.bind(this);
         this.saveCallback=props.onSave.bind(this);
@@ -213,6 +216,9 @@ class UploadContent extends React.Component{
     handleCatalogerAddition(cataloger){
         this.handleTagAddition(cataloger, 'catalogers')
     }
+    handleCollectionAddition(collection) {
+        this.handleTagAddition(collection, 'collections')
+    }
     /*
     * Handle deletion for all the fields
     */
@@ -236,6 +242,9 @@ class UploadContent extends React.Component{
     }
     handleCatalogerDeletion(cataloger){
         this.handleTagDeletion(cataloger, 'catalogers')
+    }
+    handleCollectionDeletion(collection) {
+        this.handleTagDeletion(collection, 'collections')
     }
     /*
     * Check for vaild state
@@ -307,6 +316,7 @@ class UploadContent extends React.Component{
         selectedTags.creators.forEach(creator => {payload.append('creators', creator)});
         selectedTags.coverages.length>0 && payload.append('coverage', selectedTags.coverages[0]);
         selectedTags.subjects.forEach(subject => {payload.append('subjects', subject)});
+        selectedTags.collections.forEach(collection => {payload.append('collections', collection)});
         selectedTags.keywords.forEach(keyword => {payload.append('keywords', keyword)});
         selectedTags.workareas.forEach(workarea => {payload.append('workareas', workarea)});
         selectedTags.languages.length>0 && payload.append('language', selectedTags.languages[0]);
@@ -497,6 +507,15 @@ class UploadContent extends React.Component{
                                                    searchKey={'name'} selectedItem={this.state.subjects}
                                                    onAddition={this.handleSubjectAddition} onDeletion={this.handleSubjectDeletion}/>
                         </span>
+                        <div style={{marginTop: '20px'}}> </div>
+                <Typography gutterBottom variant="subtitle1">
+                    Collection(s)
+                </Typography>
+                <span>
+                            <AutoCompleteWithChips suggestions={this.props.allTags['collections']}
+                                                   searchKey={'name'} selectedItem={this.state.collections}
+                                                   onAddition={this.handleCollectionAddition} onDeletion={this.handleCollectionDeletion}/>
+                        </span>
                 <div style={{marginTop: '20px'}}> </div>
                 <Typography gutterBottom variant="subtitle1">
                     Keywords
@@ -532,6 +551,15 @@ class UploadContent extends React.Component{
                             <AutoCompleteWithChips maxChips={1} suggestions={this.props.allTags['catalogers']} searchKey={'name'}
                                                    selectedItem={this.state.catalogers}
                                                    onAddition={this.handleCatalogerAddition} onDeletion={this.handleCatalogerDeletion}/>
+                        </span>
+                <div style={{marginTop: '20px'}}> </div>
+                <Typography gutterBottom variant="subtitle1">
+                    Collection
+                </Typography>
+                <span>
+                            <AutoCompleteWithChips maxChips={1} suggestions={this.props.allTags['Collections']} searchKey={'name'}
+                                                   selectedItem={this.state.Collections}
+                                                   onAddition={this.handleCollectionAddition} onDeletion={this.handleCollectionDeletion}/>
                         </span>
                 <TextField
                     id="source"

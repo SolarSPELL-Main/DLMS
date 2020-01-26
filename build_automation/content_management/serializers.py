@@ -6,7 +6,8 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from content_management.models import (
-    Build, Cataloger, Content, Coverage, Creator, Directory, DirectoryLayout, Keyword, Language, Subject, Workarea, MetadataSheet
+    Build, Cataloger, Content, Coverage, Creator, Directory, DirectoryLayout,
+    Keyword, Language, Subject, Workarea, MetadataSheet, Collection
 )
 
 
@@ -25,6 +26,7 @@ class ContentSerializer(serializers.ModelSerializer):
     cataloger = serializers.PrimaryKeyRelatedField(
         queryset=Cataloger.objects.all(), read_only=False, allow_null=True, required=False
     )
+    collections = serializers.PrimaryKeyRelatedField(many=True, queryset=Collection.objects.all(), read_only=False)
 
     def create(self, validated_data):
         validated_data_copy = dict(validated_data)
@@ -32,13 +34,15 @@ class ContentSerializer(serializers.ModelSerializer):
         del validated_data_copy['subjects']
         del validated_data_copy['keywords']
         del validated_data_copy['workareas']
+        del validated_data_copy['collections']
         content = Content(**validated_data_copy)
         content = self.__create_update(content, None)
         content.creators.set(validated_data['creators'])
         content.subjects.set(validated_data['subjects'])
         content.keywords.set(validated_data['keywords'])
         content.workareas.set(validated_data['workareas'])
-        content.active.set(validated_data['active'])
+        content.collections.set(validated_data['collections'])
+        content.active = validated_data['active']
         return content
 
     def update(self, content, validated_data):
@@ -50,6 +54,7 @@ class ContentSerializer(serializers.ModelSerializer):
         content.subjects.set(validated_data.get('subjects', []))
         content.keywords.set(validated_data.get('keywords', []))
         content.workareas.set(validated_data.get('workareas', []))
+        content.collections.set(validated_data.get('collections', []))
         content.language = (validated_data.get('language', content.language))
         content.cataloger = (validated_data.get('cataloger', content.cataloger))
         content.updated_time = (validated_data.get('updated_time', content.updated_time))
@@ -57,6 +62,7 @@ class ContentSerializer(serializers.ModelSerializer):
         content.copyright = (validated_data.get('copyright', content.copyright))
         content.rights_statement = (validated_data.get('rights_statement', content.rights_statement))
         content.active = (validated_data.get('active', content.active))
+        content.audience = (validated_data.get('audience', content.audience))
 
         return self.__create_update(content)
 
@@ -71,7 +77,7 @@ class ContentSerializer(serializers.ModelSerializer):
         model = Content
         fields = ('url', 'id', 'name', 'description', 'content_file', 'updated_time', 'last_uploaded_time', 'creators',
                   'coverage', 'subjects', 'keywords', 'workareas', 'language', 'cataloger', 'original_file_name',
-                  'source', 'copyright', 'rights_statement', 'active')
+                  'source', 'copyright', 'rights_statement', 'active', "audience", 'collections')
         read_only_fields = ('original_file_name',)
         extra_kwargs = {
             'url': {'lookup_field': 'pk'},
@@ -114,6 +120,27 @@ class CoverageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Coverage
+        fields = ('id', 'url', 'name', 'description')
+        extra_kwargs = {
+            'url': {'lookup_field': 'pk'},
+        }
+
+
+class CollectionSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(
+        max_length=50, validators=[
+            UniqueValidator(
+                queryset=Collection.objects.all(),
+                message={
+                    'error': 'DUPLICATE_COLLECTION_NAME'
+                },
+                lookup='iexact'
+            )
+        ]
+    )
+
+    class Meta:
+        model = Collection
         fields = ('id', 'url', 'name', 'description')
         extra_kwargs = {
             'url': {'lookup_field': 'pk'},
@@ -297,6 +324,7 @@ class DirectorySerializer(serializers.ModelSerializer):
     workareas = serializers.PrimaryKeyRelatedField(many=True, queryset=Workarea.objects.all(), read_only=False)
     languages = serializers.PrimaryKeyRelatedField(many=True, queryset=Language.objects.all(), read_only=False)
     catalogers = serializers.PrimaryKeyRelatedField(many=True, queryset=Cataloger.objects.all(), read_only=False)
+    collections = serializers.PrimaryKeyRelatedField(many=True, queryset=Collection.objects.all(), read_only=False)
 
     def create(self, validated_data):
         validated_data_copy = dict(validated_data)
@@ -308,6 +336,7 @@ class DirectorySerializer(serializers.ModelSerializer):
         del validated_data_copy['workareas']
         del validated_data_copy['languages']
         del validated_data_copy['catalogers']
+        del validated_data_copy['collections']
         directory = Directory(**validated_data_copy)
         self.__create_update(directory)
         directory.individual_files.set(validated_data['individual_files'])
@@ -318,6 +347,7 @@ class DirectorySerializer(serializers.ModelSerializer):
         directory.workareas.set(validated_data['workareas'])
         directory.languages.set(validated_data['languages'])
         directory.catalogers.set(validated_data['catalogers'])
+        directory.catalogers.set(validated_data['collections'])
         return directory
 
     def update(self, instance, validated_data):
@@ -331,6 +361,7 @@ class DirectorySerializer(serializers.ModelSerializer):
         instance.workareas_need_all = validated_data.get('workareas_need_all', instance.workareas_need_all)
         instance.languages_need_all = validated_data.get('languages_need_all', instance.languages_need_all)
         instance.catalogers_need_all = validated_data.get('catalogers_need_all', instance.catalogers_need_all)
+        instance.collections_need_all = validated_data.get('collections_need_all', instance.collections_need_all)
         instance.parent = validated_data.get('parent', instance.parent)
         self.__create_update(instance)
         instance.individual_files.set(validated_data.get('individual_files', []))
@@ -341,6 +372,7 @@ class DirectorySerializer(serializers.ModelSerializer):
         instance.workareas.set(validated_data.get('workareas', []))
         instance.languages.set(validated_data.get('languages', []))
         instance.catalogers.set(validated_data.get('catalogers', []))
+        instance.collections.set(validated_data.get('collections', []))
         return instance
 
     def __create_update(self, directory):
@@ -356,7 +388,8 @@ class DirectorySerializer(serializers.ModelSerializer):
             'id', 'url', 'name', 'dir_layout', 'individual_files', 'banner_file', 'original_file_name',
             'creators', 'coverages', 'subjects', 'keywords', 'workareas', 'languages', 'catalogers',
             'creators_need_all', 'coverages_need_all', 'subjects_need_all', 'keywords_need_all',
-            'workareas_need_all', 'languages_need_all', 'catalogers_need_all', 'parent',
+            'workareas_need_all', 'languages_need_all', 'catalogers_need_all', 'parent', 'collections',
+            'collections_need_all',
         )
         read_only_fields = ('original_file_name',)
         validators = [
@@ -402,14 +435,14 @@ class BuildSerializer(serializers.ModelSerializer):
         local_time_zone = timezone(settings.TIME_ZONE)
         return datetime_obj.astimezone(local_time_zone)
 
-        
-class MetadataSheetSerializer(serializers.ModelSerializer): 
+
+class MetadataSheetSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data_copy = dict(validated_data)
         metadata = MetadataSheet(**validated_data_copy)
         metadata = self.__create_update(metadata)
         return metadata
-    
+
     def __create_update(self, metadata):
         request = self.context['request']
         if 'metadata_file' in request.FILES:

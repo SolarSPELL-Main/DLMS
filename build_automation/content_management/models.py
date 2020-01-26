@@ -97,6 +97,18 @@ class Cataloger(AbstractTag):
         ordering = ['name']
 
 
+class Collection(AbstractTag):
+
+    def get_absolute_url(self):
+        return reverse('collection-detail', args=[str(self.id)])
+
+    def __str__(self):
+        return "Catatloger[{}]".format(self.name)
+
+    class Meta:
+        ordering = ['name']
+
+
 class Content(models.Model):
 
     def set_original_name(self, file_name):
@@ -136,6 +148,7 @@ class Content(models.Model):
 
     creators = models.ManyToManyField(Creator)
     coverage = models.ForeignKey(Coverage, on_delete=models.SET_NULL, null=True)
+    collections = models.ManyToManyField(Collection)
     subjects = models.ManyToManyField(Subject)
     keywords = models.ManyToManyField(Keyword)
     workareas = models.ManyToManyField(Workarea)
@@ -146,6 +159,7 @@ class Content(models.Model):
     copyright = models.CharField(max_length=500, null=True)
     rights_statement = models.TextField(null=True)
     active = models.SmallIntegerField(default=1)
+    audience = models.CharField(max_length=50, null=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -212,6 +226,7 @@ class Directory(models.Model):
     workareas = models.ManyToManyField(Workarea)
     languages = models.ManyToManyField(Language)
     catalogers = models.ManyToManyField(Cataloger)
+    collections = models.ManyToManyField(Collection)
 
     # Whether All of the specificed tags should be present in the content, or atleast one is needed.
     # Represent ALL or ANY of the UI state.
@@ -222,6 +237,7 @@ class Directory(models.Model):
     workareas_need_all = models.BooleanField(default=False)
     languages_need_all = models.BooleanField(default=False)
     catalogers_need_all = models.BooleanField(default=False)
+    collections_need_all = models.BooleanField(default=False)
 
     banner_file_uploaded = False
 
@@ -278,10 +294,6 @@ class MetadataSheet(models.Model):
     # The Actual File
     metadata_file = models.FileField("File", upload_to=set_original_name)
     name = models.CharField(max_length=400, null=True)
-    '''updated_time = models.DateField(
-        "Content updated on",
-        help_text='Date when the content was last updated'
-    )'''
 
     metadata_file_uploaded = False
 

@@ -21,6 +21,9 @@ import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 
 import SortableTree from 'react-sortable-tree';
+import isEqual from "lodash/isEqual"
+import differenceWith from "lodash/differenceWith"
+import some from "lodash/some"
 
 import DirlayoutInfoBoard from './dirlayout_info_board.js';
 import DirectoryInfoBoard from './directory_info_board.js';
@@ -92,6 +95,7 @@ class DirectoryLayoutComponent extends React.Component {
             infoBoardType: BOARD_TYPES.NONE,
             infoBoardData: {},
             allFiles: [],
+            filteredFiles: [],
             fileIdFileMap: {},
             dirContextMenu: {
                 selectedDirectory: null,
@@ -117,6 +121,72 @@ class DirectoryLayoutComponent extends React.Component {
         this.removeDirectoryEntry = this.removeDirectoryEntry.bind(this);
         this.handleMenuClose = this.handleMenuClose.bind(this);
         this.handleCloseSnackbar = this.handleCloseSnackbar.bind(this);
+        this.loadData = this.loadData.bind(this);
+        this.selectIndividualFiles = this.selectIndividualFiles.bind(this)
+    }
+    selectIndividualFiles() {
+        this.setState((prevState, props) => {
+            const infoBoardData = prevState.infoBoardData
+            //Contains metadata about the metadata category used to select files
+            //keys: metadata categories, values: [
+            //    use conjunction (logical and) or disjunction (logical or),
+            //    can metadata have multiple values,
+            //    infoBoardData internal name
+            //]
+            //if the metadata can only have one value the logical operation selected is unnessesary
+            //if the metadata can have multiple then the internal metadata category name under infoBoardData used can be different for some reason :(
+            const metadataInfoMap = {
+                catalogers: [infoBoardData.catalogersNeedAll, false, "catalogers"],
+                coverage: [infoBoardData.coveragesNeedAll, false, "coverages"],
+                creators: [infoBoardData.creatorsNeedAll, true, "creators"],
+                keywords: [infoBoardData.keywordsNeedAll, true, "keywords"],
+                language: [infoBoardData.languagesNeedAll, false, "languages"],
+                subjects: [infoBoardData.subjectsNeedAll, true, "subjects"],
+                collections: [infoBoardData.collectionsNeedAll, true, "collections"],
+                workareas: [infoBoardData.workareasNeedAll, true, "workareas"]
+            }
+            const entries = Object.entries(metadataInfoMap)
+
+            const passesIndividualFilter = (file, category, useConjunction, canBeMultiple, internalName) => {
+                if (canBeMultiple) {
+                    if (useConjunction) {
+                        return differenceWith(infoBoardData[internalName], file[category], isEqual).length === 0
+                    } else {
+                        return some(file[category], infoBoardData)
+                    }
+                } else {
+                    return file[category] == infoBoardData[internalName]
+                }
+            }
+
+            const selectedFiles = prevState.allFiles.filter(file => {
+                for (const entry of entries) {
+                    const [category, metadataInfo] = entry
+                    const [useConjunction, canBeMultiple, internalName] = metadataInfo
+                    if (passesIndividualFilter(file, category, useConjunction, canBeMultiple, internalName)) {
+                        continue
+                    } else {
+                        return false
+                    }
+                }
+                return true
+            })
+
+            const retVal = {
+                infoBoardData: Object.assign(prevState.infoBoardData, { selectedFiles })
+            }
+            console.log(retVal)
+            return retVal
+        })
+    }
+    //Will cause infinite loop if invoking this function through state changes mutates anything in state.infoBoardData
+    //besides state.infoBoardData.individualFiles
+    componentDidUpdate(prevProps, prevState) {
+        var {individualFiles, ...prevOtherData} = prevState.infoBoardData
+        var {individualFiles, ...otherData} = this.state.infoBoardData
+        if (!(isEqual(prevOtherData, otherData))) {
+            this.selectIndividualFiles()
+        }
     }
     /*
     * Populate the data
@@ -177,6 +247,7 @@ class DirectoryLayoutComponent extends React.Component {
     * Turn directories into a tree
     */
     transformDirectoriesToTreeData(dirLayouts, inputData) {
+        console.log(dirLayouts, inputData)
         const directoryLayoutInfo = {};
 
         dirLayouts.forEach(eachLayout => {
@@ -212,9 +283,10 @@ class DirectoryLayoutComponent extends React.Component {
             layoutDirectories[eachDir.id].workareas = eachDir.workareas;
             layoutDirectories[eachDir.id].languages = eachDir.languages;
             layoutDirectories[eachDir.id].catalogers = eachDir.catalogers;
+            layoutDirectories[eachDir.id].collections = eachDir.collections;
             layoutDirectories[eachDir.id].creatorsNeedAll = eachDir.creators_need_all;
             layoutDirectories[eachDir.id].coveragesNeedAll = eachDir.coverages_need_all;
-            layoutDirectories[eachDir.id].subjectsNeedAll = eachDir.subjects_need_all;
+            layoutDirectories[eachDir.id].collectionsNeedAll = eachDir.collections_need_all;
             layoutDirectories[eachDir.id].keywordsNeedAll = eachDir.keywords_need_all;
             layoutDirectories[eachDir.id].workareasNeedAll = eachDir.workareas_need_all;
             layoutDirectories[eachDir.id].languagesNeedAll = eachDir.languages_need_all;
@@ -237,7 +309,7 @@ class DirectoryLayoutComponent extends React.Component {
         });
 
         const retval = {};
-
+        console.log(directoryLayoutInfo)
         Object.keys(directoryLayoutInfo).forEach(eachLayoutId => {
             const currentLayoutInfo = directoryLayoutInfo[eachLayoutId];
             const layoutDirectories = currentLayoutInfo.directories;
@@ -249,12 +321,14 @@ class DirectoryLayoutComponent extends React.Component {
             retval[eachLayoutId] = treeData;
         });
 
+        console.log(retval)
         return retval;
     }
     /*
     * Retrieve and load components with data
     */
     loadData() {
+        console.log("Loading Data")
         const currInstance = this;
         const allRequests = [];
         allRequests.push(axios.get(APP_URLS.ALLTAGS_LIST, {responseType: 'json'}).then(function(response) {
@@ -264,7 +338,7 @@ class DirectoryLayoutComponent extends React.Component {
             const fileIdFileMap = buildMapFromArray(response.data.results, 'id');
             return {
                 fileIdFileMap,
-                allFiles: response.data
+                allFiles: response.data.results
             };
         }));
         allRequests.push(axios.get(APP_URLS.DIRLAYOUT_LIST, {responseType: 'json'}));
@@ -274,9 +348,10 @@ class DirectoryLayoutComponent extends React.Component {
         }));
 
         Promise.all(allRequests).then(function(values){
-            const tags = values[0].data.results;
-            const allFiles = values[1].allFiles.results;
-            const fileIdFileMap = values[1].fileIdFileMap.results;
+            console.log(values)
+            const tags = values[0].data;
+            const allFiles = values[1].allFiles;
+            const fileIdFileMap = values[1].fileIdFileMap;
             const dirLayouts = values[2].data.results;
             const directories = values[3].data.results;
             const transformedData = currInstance.transformDirectoriesToTreeData(dirLayouts, directories);
@@ -403,6 +478,7 @@ class DirectoryLayoutComponent extends React.Component {
                 workareas: [],
                 languages: [],
                 catalogers: [],
+                collections: [],
                 creatorsNeedAll: false,
                 coveragesNeedAll: false,
                 subjectsNeedAll: false,
@@ -478,6 +554,8 @@ class DirectoryLayoutComponent extends React.Component {
                     <ChevronRight style={{verticalAlign: 'middle'}}/>
                     </span>);
             }
+
+            console.log(this.state.infoBoardType, this.state.allFiles)
 
             elements = (
                 <Grid container spacing={1}>
@@ -633,6 +711,7 @@ class DirectoryLayoutComponent extends React.Component {
     * Update file/subdirectory
     */
     updateDirectoryEntry(directoryId, array, newValue, created) {
+        console.log("Directory Entry Updated")
         for (var i=0; i<array.length; i++) {
             if (array[i].id == directoryId) {
                 if (created) {
@@ -653,6 +732,7 @@ class DirectoryLayoutComponent extends React.Component {
                         workareas: newValue.workareas,
                         languages: newValue.languages,
                         catalogers: newValue.catalogers,
+                        collections: newValue.collections,
                         creatorsNeedAll: newValue.creators_need_all,
                         coveragesNeedAll: newValue.coverages_need_all,
                         subjectsNeedAll: newValue.subjects_need_all,
@@ -677,6 +757,7 @@ class DirectoryLayoutComponent extends React.Component {
                     array[i].workareas = newValue.workareas;
                     array[i].languages = newValue.languages;
                     array[i].catalogers = newValue.catalogers;
+                    array[i].collections = newValue.collections;
                     array[i].creatorsNeedAll = newValue.creators_need_all;
                     array[i].coveragesNeedAll = newValue.coverages_need_all;
                     array[i].subjectsNeedAll = newValue.subjects_need_all;
@@ -684,6 +765,7 @@ class DirectoryLayoutComponent extends React.Component {
                     array[i].workareasNeedAll = newValue.workareas_need_all;
                     array[i].languagesNeedAll = newValue.languages_need_all;
                     array[i].catalogersNeedAll = newValue.catalogers_need_all;
+                    array[i].collectionsNeedAll = newValue.collections_need_all;
                 }
                 return true;
             }
@@ -700,6 +782,7 @@ class DirectoryLayoutComponent extends React.Component {
     * Update displayed data
     */
     updateBoardData(boardData, directory) {
+        console.log("Board Data Updated")
         boardData.id = directory.id;
         boardData.name = directory.name;
         boardData.dirLayoutId = directory.dir_layout;
@@ -713,6 +796,7 @@ class DirectoryLayoutComponent extends React.Component {
         boardData.workareas = directory.workareas;
         boardData.languages = directory.languages;
         boardData.catalogers = directory.catalogers;
+        boardData.collections = directory.collections
         boardData.creatorsNeedAll = directory.creators_need_all;
         boardData.coveragesNeedAll = directory.coverages_need_all;
         boardData.subjectsNeedAll = directory.subjects_need_all;
@@ -720,6 +804,7 @@ class DirectoryLayoutComponent extends React.Component {
         boardData.workareasNeedAll = directory.workareas_need_all;
         boardData.languagesNeedAll = directory.languages_need_all;
         boardData.catalogersNeedAll = directory.catalogers_need_all;
+        boardData.collectionsNeedAll = directory.collections_need_all
         boardData.parent = directory.parent;
     }
     /*
@@ -758,6 +843,7 @@ class DirectoryLayoutComponent extends React.Component {
                         workareas: savedInfo.workareas,
                         languages: savedInfo.languages,
                         catalogers: savedInfo.catalogers,
+                        collections: savedInfo.collections,
                         creatorsNeedAll: savedInfo.creators_need_all,
                         coveragesNeedAll: savedInfo.coverages_need_all,
                         subjectsNeedAll: savedInfo.subjects_need_all,
@@ -765,6 +851,7 @@ class DirectoryLayoutComponent extends React.Component {
                         workareasNeedAll: savedInfo.workareas_need_all,
                         languagesNeedAll: savedInfo.languages_need_all,
                         catalogersNeedAll: savedInfo.catalogers_need_all,
+                        collectionsNeedAll: savedInfo.collections_need_all,
                         children: []
                     });
                 }

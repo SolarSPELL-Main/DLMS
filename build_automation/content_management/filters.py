@@ -22,7 +22,9 @@ class ContentsFilterSet(FilterSet):
             'workareas': ['in'],
             'language': ['in'],
             'cataloger': ['in'],
-            'active': ['exact']
+            'active': ['exact'],
+            'audience': ['icontains'],
+            'collections': ['in']
         }
 
     @classmethod
