@@ -21,7 +21,7 @@ import axios from 'axios';
 import { APP_URLS } from './url';
 import { ActionPanel } from "./action_panel";
 import { CheckCircleOutline, HighlightOff, Description } from "@material-ui/icons"
-import { get } from "lodash"
+import { get, toString } from "lodash"
 
 import {
     DataTypeProvider,
@@ -70,7 +70,8 @@ const Cell = (props) => {
 //Simple component for displaying information about a given content
 const FileInfoEntry = (props) => {
     const { name, property, selectedFile } = props
-    const displayFn = props.displayFn || (data => String(data))
+    const displayFn = props.displayFn || toString
+    console.log(get(selectedFile, property, null), selectedFile, property)
     const data = get(selectedFile, property, null)
     return (
         <>
@@ -527,7 +528,11 @@ class FileListComponent extends React.Component {
                     <DialogTitle id="alert-dialog-title">Data for content file: {get(this.state.selectedFile, "name", "")}</DialogTitle>
                     <DialogContent>
                         <DialogContentText id="alert-dialog-description">
-                            <FileInfoEntry name="Description" property="description"/>
+                            <FileInfoEntry
+                                name="Description"
+                                property="description"
+                                selectedFile={this.state.selectedFile}
+                            />
                             <FileInfoEntry
                                 name="Creators"
                                 property="creators"
@@ -576,7 +581,11 @@ class FileListComponent extends React.Component {
                                 displayFn={id => this.props.tagIdsTagsMap["catalogers"][id].name}
                                 selectedFile={this.state.selectedFile}
                             />
-                            <FileInfoEntry name="Updated On" property="updated_time"/>
+                            <FileInfoEntry
+                                name="Updated On"
+                                property="updated_time"
+                                selectedFile={this.state.selectedFile}
+                            />
                             <FileInfoEntry
                                 name="Active"
                                 property="active"

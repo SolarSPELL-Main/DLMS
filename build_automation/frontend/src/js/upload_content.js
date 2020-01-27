@@ -123,6 +123,7 @@ class UploadContent extends React.Component{
             });
             retval[eachTagType] = labels;
         });
+        console.log(retval)
         return retval;
     }
     /*
@@ -557,8 +558,8 @@ class UploadContent extends React.Component{
                     Collection
                 </Typography>
                 <span>
-                            <AutoCompleteWithChips maxChips={1} suggestions={this.props.allTags['Collections']} searchKey={'name'}
-                                                   selectedItem={this.state.Collections}
+                            <AutoCompleteWithChips maxChips={1} suggestions={this.props.allTags['collections']} searchKey={'name'}
+                                                   selectedItem={this.state.collections}
                                                    onAddition={this.handleCollectionAddition} onDeletion={this.handleCollectionDeletion}/>
                         </span>
                 <TextField

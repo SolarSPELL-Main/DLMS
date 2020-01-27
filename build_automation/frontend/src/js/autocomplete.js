@@ -168,7 +168,7 @@ class AutoCompleteWithChips extends React.Component {
                 getItemProps,
                 isOpen,
                 inputValue: inputValue2,
-                selectedItem: selectedItem2,
+                selectedItem,
                 highlightedIndex,
                 }) => (
                     <div className={classes.container}>
@@ -177,21 +177,21 @@ class AutoCompleteWithChips extends React.Component {
                                 fullWidth: true,
                                 classes,
                                 InputProps: getInputProps({
-                                startAdornment: selectedItem.map(item => (
-                                    <Chip
-                                        key={item}
-                                        tabIndex={-1}
-                                        label={item}
-                                        className={classes.chip}
-                                        onDelete={evt => this.handleDelete(item)}
-                                    />
-                                )),
-                                onChange: this.handleInputChange,
-                                onKeyDown: this.handleKeyDown,
-                                placeholder: this.props.placeholder,
-                                id: this.props.id,
-                                required: this.props.required,
-                                error: this.props.errorMsg ? true : false
+                                    startAdornment: selectedItem.map(item => (
+                                        <Chip
+                                            key={item}
+                                            tabIndex={-1}
+                                            label={item}
+                                            className={classes.chip}
+                                            onDelete={evt => this.handleDelete(item)}
+                                        />
+                                    )),
+                                    onChange: this.handleInputChange,
+                                    onKeyDown: this.handleKeyDown,
+                                    placeholder: this.props.placeholder,
+                                    id: this.props.id,
+                                    required: this.props.required,
+                                    error: this.props.errorMsg ? true : false
                                 }),
                             })
                         }
@@ -205,7 +205,7 @@ class AutoCompleteWithChips extends React.Component {
                                                 index,
                                                 itemProps: getItemProps({ item: suggestion[this.props.searchKey] }),
                                                 highlightedIndex,
-                                                selectedItem: selectedItem2,
+                                                selectedItem,
                                                 searchKey: this.props.searchKey,
                                             }),
                                         )

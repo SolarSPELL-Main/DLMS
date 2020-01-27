@@ -358,7 +358,6 @@ class TagManagementComponent extends React.Component {
         this.setState({
             selectedTag: row,
             [menuName]: {
-
                 selectedTag: row,
                 AnchorPos: { top: evt.clientY, left: evt.clientX }
             }
