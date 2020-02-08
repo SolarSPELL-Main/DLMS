@@ -24,6 +24,7 @@ class ContentsFilterSet(FilterSet):
             'cataloger': ['in'],
             'active': ['exact'],
             'audience': ['icontains'],
+            'original_file_name': ['icontains'],
             'collections': ['in']
         }
 

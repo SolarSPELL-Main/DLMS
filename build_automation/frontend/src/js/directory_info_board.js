@@ -26,12 +26,14 @@ import { APP_URLS } from './url.js';
 import { buildMapFromArray } from './utils.js';
 
 import 'react-sortable-tree/style.css';
+import isEqual from 'lodash/isEqual';
 /*
 * Constructor for Directory info board
 */
 class DirectoryInfoBoard extends React.Component {
     constructor(props) {
         super(props);
+        console.log(props)
         this.tagIdsTagsMap = this.buildTagIdTagsMap(props.tags);
         const labels = this.getAutoCompleteLabelsFromTagIds(props.boardData, this.tagIdsTagsMap);
         this.state = {
@@ -81,6 +83,7 @@ class DirectoryInfoBoard extends React.Component {
         this.fileDeselectionCallback = this.fileDeselectionCallback.bind(this);
         this.confirmDeleteDirectory = this.confirmDeleteDirectory.bind(this);
         this.closeConfirmDialog = this.closeConfirmDialog.bind(this);
+        this.handleUpdateMetadata = this.handleUpdateMetadata.bind(this);
     }
     /*
     * Build a map containing tag ids
@@ -111,11 +114,7 @@ class DirectoryInfoBoard extends React.Component {
         Object.keys(tagIdsTagsMap).forEach(eachTagType => {
             const selectedTagsForDir = boardInfo[eachTagType];
             const selectedTypeAllTags = tagIdsTagsMap[eachTagType];
-            const labels = [];
-            selectedTagsForDir.forEach(eachTagId => {
-                labels.push(selectedTypeAllTags[eachTagId].name);
-            });
-            retval[eachTagType] = labels;
+            retval[eachTagType] = selectedTagsForDir;
         });
         return retval;
     }
@@ -141,38 +140,41 @@ class DirectoryInfoBoard extends React.Component {
     * Components will receive data
     */
     UNSAFE_componentWillReceiveProps(props) {
-        this.tagIdsTagsMap = this.buildTagIdTagsMap(props.tags);
-        const labels = this.getAutoCompleteLabelsFromTagIds(props.boardData, this.tagIdsTagsMap);
-        this.setState({
-            id: props.boardData.id,
-            dirLayoutId: props.boardData.dirLayoutId,
-            name: props.boardData.name,
-            parent: props.boardData.parent,
-            bannerFile: null,
-            bannerFileName: props.boardData.originalFileName ? props.boardData.originalFileName : '',
-            creators: labels['creators'],
-            coverages: labels['coverages'],
-            subjects: labels['subjects'],
-            keywords: labels['keywords'],
-            workareas: labels['workareas'],
-            languages: labels['languages'],
-            catalogers: labels['catalogers'],
-            collections: labels['collections'],
-            creatorsNeedAll: (props.boardData.creatorsNeedAll ? 'All' : 'Any'),
-            coveragesNeedAll: (props.boardData.coveragesNeedAll ? 'All' : 'Any'),
-            subjectsNeedAll: (props.boardData.subjectsNeedAll ? 'All' : 'Any'),
-            keywordsNeedAll: (props.boardData.keywordsNeedAll ? 'All' : 'Any'),
-            workareasNeedAll: (props.boardData.workareasNeedAll ? 'All' : 'Any'),
-            languagesNeedAll: (props.boardData.languagesNeedAll ? 'All' : 'Any'),
-            catalogersNeedAll: (props.boardData.catalogersNeedAll ? 'All' : 'Any'),
-            collectionsNeedAll: (props.boardData.collectionsNeedAll ? 'All' : 'Any'),
-            selectedFiles: props.boardData.individualFiles,
-            confirmDelete: false,
-            fieldErrors: {}
-        });
-        this.allFiles = props.allFiles;
-        this.tagNameTagMap = this.buildTagNameTagMap(props.tags);
-        this.fileIdFileMap = props.fileIdFileMap;
+        console.log(props)
+        if (!isEqual(props.allFiles, this.props.allFiles)) {
+            console.log(props.boardData, this.tagIdsTagsMap)
+            const labels = this.getAutoCompleteLabelsFromTagIds(props.boardData, this.tagIdsTagsMap);
+            this.setState({
+                id: props.boardData.id,
+                dirLayoutId: props.boardData.dirLayoutId,
+                name: props.boardData.name,
+                parent: props.boardData.parent,
+                bannerFile: null,
+                bannerFileName: props.boardData.originalFileName ? props.boardData.originalFileName : '',
+                creators: labels['creators'],
+                coverages: labels['coverages'],
+                subjects: labels['subjects'],
+                keywords: labels['keywords'],
+                workareas: labels['workareas'],
+                languages: labels['languages'],
+                catalogers: labels['catalogers'],
+                collections: labels['collections'],
+                creatorsNeedAll: (props.boardData.creatorsNeedAll ? 'All' : 'Any'),
+                coveragesNeedAll: (props.boardData.coveragesNeedAll ? 'All' : 'Any'),
+                subjectsNeedAll: (props.boardData.subjectsNeedAll ? 'All' : 'Any'),
+                keywordsNeedAll: (props.boardData.keywordsNeedAll ? 'All' : 'Any'),
+                workareasNeedAll: (props.boardData.workareasNeedAll ? 'All' : 'Any'),
+                languagesNeedAll: (props.boardData.languagesNeedAll ? 'All' : 'Any'),
+                catalogersNeedAll: (props.boardData.catalogersNeedAll ? 'All' : 'Any'),
+                collectionsNeedAll: (props.boardData.collectionsNeedAll ? 'All' : 'Any'),
+                selectedFiles: props.boardData.individualFiles,
+                confirmDelete: false,
+                fieldErrors: {}
+            });
+            this.allFiles = props.allFiles;
+            this.tagNameTagMap = this.buildTagNameTagMap(props.tags);
+            this.fileIdFileMap = props.fileIdFileMap;
+        }
     }
     /*
     * Get the selected tags based of the tag names
@@ -339,14 +341,21 @@ class DirectoryInfoBoard extends React.Component {
         })
     }
 
+    handleUpdateMetadata() {
+        const toCheck = ["catalogers", "collections", "coverages", "creators", "keywords", "languages", "subjects", "workareas"]
+        const retVal = {}
+        toCheck.forEach(metadata => retVal[metadata] = this.state[metadata])
+        this.props.updateMetadata(retVal)
+    }
+
     /* Called when a chip is added to the autocomplete component. */
     handleChipAddition(addedChip, tagType) {
         this.setState((prevState, props) => {
             const selectedTags = prevState[tagType];
-            console.log(addedChips)
+            console.log(addedChip)
             selectedTags.push(addedChip.name);
             return {[tagType]: selectedTags};
-        });
+        }, this.handleUpdateMetadata);
     }
     /*
     * Process a chip deletion
@@ -356,7 +365,7 @@ class DirectoryInfoBoard extends React.Component {
             const selectedTags = prevState[tagType];
             selectedTags.splice(selectedTags.indexOf(deletedChip.name), 1);
             return {[tagType]: selectedTags};
-        });
+        }, this.handleUpdateMetadata);
     }
     /*
     * Recall previous files selected

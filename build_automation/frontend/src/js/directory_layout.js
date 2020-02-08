@@ -29,7 +29,7 @@ import DirlayoutInfoBoard from './dirlayout_info_board.js';
 import DirectoryInfoBoard from './directory_info_board.js';
 
 import { DIRLAYOUT_SAVE_TYPE } from './constants.js';
-import { APP_URLS } from './url.js';
+import { APP_URLS, get_filter_query, FILTER_PARAMS } from './url.js';
 import { buildMapFromArray } from './utils.js';
 
 import 'react-sortable-tree/style.css';
@@ -123,6 +123,7 @@ class DirectoryLayoutComponent extends React.Component {
         this.handleCloseSnackbar = this.handleCloseSnackbar.bind(this);
         this.loadData = this.loadData.bind(this);
         this.selectIndividualFiles = this.selectIndividualFiles.bind(this)
+        this.updateMetadata = this.updateMetadata.bind(this)
     }
     selectIndividualFiles() {
         this.setState((prevState, props) => {
@@ -324,17 +325,34 @@ class DirectoryLayoutComponent extends React.Component {
         console.log(retval)
         return retval;
     }
+    updateMetadata(metadataFilters) {
+        metadataFilters = metadataFilters || []
+        this.setState((prevState) => {
+            return {
+                infoBoardData: Object.assign(prevState.infoBoardData, metadataFilters)
+            }
+        }, this.loadData)
+    }
     /*
     * Retrieve and load components with data
     */
     loadData() {
-        console.log("Loading Data")
+        const toCheck = ["catalogers", "collections", "coverages", "creators", "keywords", "languages", "subjects", "workareas"]
+        const filters = toCheck.map(metadata => {
+            const value = this.state.infoBoardData[metadata] ? this.state.infoBoardData[metadata].map(tag_name => 
+                this.state.tags[metadata].find(tag => tag.name == tag_name).id
+            ) : []
+            return {
+                columnName: metadata,
+                value 
+            }
+        })
         const currInstance = this;
         const allRequests = [];
         allRequests.push(axios.get(APP_URLS.ALLTAGS_LIST, {responseType: 'json'}).then(function(response) {
             return response;
         }));
-        allRequests.push(axios.get(APP_URLS.CONTENTS_LIST, {responseType: 'json'}).then(function(response) {
+        allRequests.push(axios.get(APP_URLS.CONTENTS_LIST + "?" + get_filter_query(filters, FILTER_PARAMS.DIRLAYOUT_METADATA), {responseType: 'json'}).then(function(response) {
             const fileIdFileMap = buildMapFromArray(response.data.results, 'id');
             return {
                 fileIdFileMap,
@@ -348,7 +366,6 @@ class DirectoryLayoutComponent extends React.Component {
         }));
 
         Promise.all(allRequests).then(function(values){
-            console.log(values)
             const tags = values[0].data;
             const allFiles = values[1].allFiles;
             const fileIdFileMap = values[1].fileIdFileMap;
@@ -358,16 +375,24 @@ class DirectoryLayoutComponent extends React.Component {
             dirLayouts.forEach(eachDirLayout => {
                 eachDirLayout.isOpen = false;
             });
-            currInstance.setState({
-                tags: tags,
-                allFiles: allFiles,
-                fileIdFileMap: fileIdFileMap,
-                isLoaded: true,
-                accordionData: dirLayouts,
-                treeData: transformedData,
-                infoBoardType: BOARD_TYPES.NONE,
-                infoBoardData: {},
-                breadCrumb: []
+            currInstance.setState(prevState => {
+                if (prevState.infoBoardType == BOARD_TYPES.DIRECTORY) {
+                    return {
+                        allFiles
+                    }
+                } else {
+                    return {
+                        tags: tags,
+                        allFiles: allFiles,
+                        fileIdFileMap: fileIdFileMap,
+                        isLoaded: true,
+                        accordionData: dirLayouts,
+                        treeData: transformedData,
+                        infoBoardType: BOARD_TYPES.NONE,
+                        infoBoardData: {},
+                        breadCrumb: []
+                    }
+                }
             })
         }).catch(function(error) {
             console.error(error);
@@ -555,8 +580,6 @@ class DirectoryLayoutComponent extends React.Component {
                     </span>);
             }
 
-            console.log(this.state.infoBoardType, this.state.allFiles)
-
             elements = (
                 <Grid container spacing={1}>
                     <Grid item xs={3} style={{paddingLeft: '20px'}}>
@@ -585,7 +608,15 @@ class DirectoryLayoutComponent extends React.Component {
                         }
                         {
                             this.state.infoBoardType == BOARD_TYPES.DIRECTORY &&
-                                <DirectoryInfoBoard boardData={this.state.infoBoardData} onSave={this.saveDirectoryCallback} onDelete={this.deleteDirectoryCallback} tags={this.state.tags} allFiles={this.state.allFiles} fileIdFileMap={this.state.fileIdFileMap} />
+                                <DirectoryInfoBoard
+                                    boardData={this.state.infoBoardData}
+                                    onSave={this.saveDirectoryCallback}
+                                    onDelete={this.deleteDirectoryCallback}
+                                    tags={this.state.tags}
+                                    allFiles={this.state.allFiles}
+                                    fileIdFileMap={this.state.fileIdFileMap}
+                                    updateMetadata={this.updateMetadata}
+                                />
                         }
                     </Grid>
                     <Menu

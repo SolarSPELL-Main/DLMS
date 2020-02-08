@@ -20,12 +20,12 @@ const ActionPanel = (props) => {
                 row.active == 0 ? (
                     <CheckCircleOutline
                         style={pointerStyle}
-                        onClick={() => setActive(false)}
+                        onClick={() => setActive(true)}
                     />
                 ) : (
                     <HighlightOff
                         style={pointerStyle}
-                        onClick={() => setActive(true)}
+                        onClick={() => setActive(false)}
                     />
                 )
             ) : (

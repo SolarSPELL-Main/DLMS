@@ -7,13 +7,19 @@ import tarfile
 import tempfile
 import zipfile
 import contextlib
+import csv
 
 from django.conf import settings
+from django.db import IntegrityError
 from django.db.models import Q
 from django.template.loader import render_to_string
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
-from content_management.models import Build, Content, Directory, DirectoryLayout
+from content_management.models import (
+    Build, Content, Directory, DirectoryLayout, Collection, Creator, Coverage, Workarea,
+    Keyword, Language, Subject, Cataloger
+)
 from content_management.storage import CustomFileStorage
 
 
@@ -399,3 +405,53 @@ def temporary_filename(dir=settings.TEMP_ROOT):
         yield tmp_name
     finally:
         os.unlink(tmp_name)
+
+
+# Takes a metadata sheet instance and loads all metadata from that uploaded csv sheet into the content database
+def load_metadata(metadata_sheet):
+    contents = csv.DictReader(open(metadata_sheet.metadata_file.path))
+    for row in contents:
+        print(row)
+        singletons = [["cataloger", Cataloger], ["coverage", Coverage], ["language", Language], ]
+        multiples = [
+            ["collections", Collection], ["creators", Creator], ["keywords", Keyword],
+            ["subjects", Subject], ["workareas", Workarea]
+        ]
+        content_dict = {
+            "name": row["name"],
+            "description": row["description"],
+            "updated_time": timezone.now(),
+            "audience": row["audience"],
+            "last_uploaded_time": timezone.now(),
+            "original_file_name": row["filename"],
+            "source": row["source"],
+            "copyright": row["copyright"],
+            "rights_statement": row["rights_statement"],
+            "active": 1,
+        }
+
+        try:
+            content_object = Content(**content_dict)
+            content_object.save()
+
+            for metadata in singletons:
+                dict_key, model = metadata
+                try:
+                    trimmed = row[dict_key].strip()
+                    obj, created = model.objects.get_or_create(name=trimmed)
+                    setattr(content_object, dict_key, obj)
+                except ObjectDoesNotExist:
+                    continue
+
+            for metadata in multiples:
+                dict_key, model = metadata
+                metadata_names = row[dict_key].split("|")
+                field = getattr(content_object, dict_key)
+                for metadata_name in metadata_names:
+                    trimmed = metadata_name.strip()
+                    obj, created = model.objects.get_or_create(name=trimmed)
+                    field.add(obj)
+            content_object.save()
+        except IntegrityError as e:
+            print(str(e))
+            continue

@@ -235,7 +235,7 @@ class FileListComponent extends React.Component {
             {name: 'name', title: 'Name', filterType: 'textfield'},
             {name: 'original_file_name', title: 'Filename', filterType: 'textfield'},
             {name: 'creators', title: 'Creators', filterType: 'autocomplete', tagKey: 'creators'},
-            {name: 'updated_time', title: 'Updated on', filterType: 'textfield', placeholder: "MM/DD/YYYY-MM/DD/YYYY"},
+            {name: 'updated_time', title: 'Updated on', filterType: 'textfield', placeholder: "YYYY/MM/DD-YYYY/MM/DD"},
             {name: 'description', title: 'Description', filterType: 'textfield'},
             {name: 'language', title: 'Language', filterType: 'autocomplete', tagKey: 'languages'},
             //TODO: Add Collection Type and Resource Type column + filter

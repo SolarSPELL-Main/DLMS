@@ -52,7 +52,18 @@ const FILTER_PARAMS = {
         'language': ['in'],
         'cataloger': ['in'],
         'collections': ['in'],
-        'active': [null]
+        'active': [null],
+        'original_file_name': ['icontains']
+    },
+    DIRLAYOUT_METADATA: {
+        'creators': ['in'],
+        'coverages': ['in'],
+        'subjects': ['in'],
+        'collections': ['in'],
+        'keywords': ['in'],
+        'workareas': ['in'],
+        'languages': ['in'],
+        'catalogers': ['in'],
     }
 }
 
@@ -60,20 +71,24 @@ const get_filter_param = (name, op, value) => `${name}${op ? "__" + op : ""}=${e
 
 //Takes a devexpress grid filter array and turns it into a string that can be appended to a pagination url
 const get_filter_query = (filters, viewset_params) => {
-    return filters.map(filter => {
-        const { name, val } = filter
-        const operations = viewset_params[name]
+    const returnVal = filters.map(filter => {
+        const { columnName, value } = filter
+        const operations = viewset_params[columnName]
+        console.log(filters, viewset_params)
         if (isEqual(operations, ['in'])) {
-            return get_filter_param(name, operations[0], val.join(","))
-        } else if (isEqual(operations, ['lte', 'gte'])) {
+            return get_filter_param(columnName, operations[0], value.join(","))
+        } else if (isEqual(operations, ['gte', 'lte'])) {
             //Turns filter.value == '12/19/2019-12/21/2019' into dates == ['12-19-2019', '12-21-2019']
-            const dates = val.split("-").map(date => date.replace(/\//g, '-'))
-            return dates.length !== 2 ? null : operations.map((op, idx) => get_filter_param(name, op, dates[idx])).join("&")
-        } else if (name == "active") {
-            return get_filter_param(name, operations[0], val ? 1 : 0)
+            const dates = value.split("-").map(date => date.replace(/\//g, '-'))
+            console.log(dates)
+            return dates.length !== 2 ? null : operations.map((op, idx) => get_filter_param(columnName, op, dates[idx])).join("&")
+        } else if (columnName == "active") {
+            return get_filter_param(columnName, operations[0], value ? 1 : 0)
         }
-        return get_filter_param(name, operations[0], val)
+        return get_filter_param(columnName, operations[0], value)
     }).filter(val => val !== null).join("&")
+    console.log(returnVal)
+    return returnVal
 }
 
 export {

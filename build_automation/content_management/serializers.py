@@ -10,6 +10,8 @@ from content_management.models import (
     Keyword, Language, Subject, Workarea, MetadataSheet, Collection
 )
 
+from content_management.utils import load_metadata
+
 
 class ContentSerializer(serializers.ModelSerializer):
 
@@ -441,6 +443,7 @@ class MetadataSheetSerializer(serializers.ModelSerializer):
         validated_data_copy = dict(validated_data)
         metadata = MetadataSheet(**validated_data_copy)
         metadata = self.__create_update(metadata)
+        load_metadata(metadata)
         return metadata
 
     def __create_update(self, metadata):
