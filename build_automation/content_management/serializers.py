@@ -6,8 +6,8 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from content_management.models import (
-    Build, Cataloger, Content, Coverage, Creator, Directory, DirectoryLayout,
-    Keyword, Language, Subject, Workarea, MetadataSheet, Collection
+    Build, Cataloger, Content, Creator, Directory, DirectoryLayout,
+    Keyword, Language, Subject, MetadataSheet, Collection, Audience, ResourceType
 )
 
 from content_management.utils import load_metadata
@@ -16,14 +16,16 @@ from content_management.utils import load_metadata
 class ContentSerializer(serializers.ModelSerializer):
 
     creators = serializers.PrimaryKeyRelatedField(many=True, queryset=Creator.objects.all(), read_only=False)
-    coverage = serializers.PrimaryKeyRelatedField(
-        queryset=Coverage.objects.all(), read_only=False, allow_null=True, required=False
-    )
     subjects = serializers.PrimaryKeyRelatedField(many=True, queryset=Subject.objects.all(), read_only=False)
     keywords = serializers.PrimaryKeyRelatedField(many=True, queryset=Keyword.objects.all(), read_only=False)
-    workareas = serializers.PrimaryKeyRelatedField(many=True, queryset=Workarea.objects.all(), read_only=False)
     language = serializers.PrimaryKeyRelatedField(
         queryset=Language.objects.all(), read_only=False, allow_null=True, required=False
+    )
+    audience = serializers.PrimaryKeyRelatedField(
+        queryset=Audience.objects.all(), read_only=False, allow_null=True, required=False
+    )
+    resourcetype = serializers.PrimaryKeyRelatedField(
+        queryset=ResourceType.objects.all(), read_only=False, allow_null=True, required=False
     )
     cataloger = serializers.PrimaryKeyRelatedField(
         queryset=Cataloger.objects.all(), read_only=False, allow_null=True, required=False
@@ -35,14 +37,12 @@ class ContentSerializer(serializers.ModelSerializer):
         del validated_data_copy['creators']
         del validated_data_copy['subjects']
         del validated_data_copy['keywords']
-        del validated_data_copy['workareas']
         del validated_data_copy['collections']
         content = Content(**validated_data_copy)
         content = self.__create_update(content, None)
         content.creators.set(validated_data['creators'])
         content.subjects.set(validated_data['subjects'])
         content.keywords.set(validated_data['keywords'])
-        content.workareas.set(validated_data['workareas'])
         content.collections.set(validated_data['collections'])
         content.active = validated_data['active']
         return content
@@ -52,19 +52,18 @@ class ContentSerializer(serializers.ModelSerializer):
         content.description = validated_data.get('description', content.description)
         content.content_file = validated_data.get('content_file', content.content_file)
         content.creators.set(validated_data.get('creators', []))
-        content.coverage = (validated_data.get('coverage', content.coverage))
         content.subjects.set(validated_data.get('subjects', []))
         content.keywords.set(validated_data.get('keywords', []))
-        content.workareas.set(validated_data.get('workareas', []))
         content.collections.set(validated_data.get('collections', []))
         content.language = (validated_data.get('language', content.language))
         content.cataloger = (validated_data.get('cataloger', content.cataloger))
         content.updated_time = (validated_data.get('updated_time', content.updated_time))
-        content.source = (validated_data.get('source', content.source))
+        content.published_date = (validated_data.get('published_date', content.published_date))
         content.copyright = (validated_data.get('copyright', content.copyright))
         content.rights_statement = (validated_data.get('rights_statement', content.rights_statement))
         content.active = (validated_data.get('active', content.active))
         content.audience = (validated_data.get('audience', content.audience))
+        content.resourcetype = (validated_data.get('resourcetype', content.resourcetype))
 
         return self.__create_update(content)
 
@@ -77,9 +76,11 @@ class ContentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Content
-        fields = ('url', 'id', 'name', 'description', 'content_file', 'updated_time', 'last_uploaded_time', 'creators',
-                  'coverage', 'subjects', 'keywords', 'workareas', 'language', 'cataloger', 'original_file_name',
-                  'source', 'copyright', 'rights_statement', 'active', "audience", 'collections')
+        fields = (
+                    'url', 'id', 'name', 'description', 'content_file', 'updated_time', 'last_uploaded_time',
+                    'creators', 'subjects', 'keywords', 'language', 'cataloger', 'original_file_name', 'audience',
+                    'copyright', 'rights_statement', 'active', 'resourcetype', 'collections', 'published_date'
+                )
         read_only_fields = ('original_file_name',)
         extra_kwargs = {
             'url': {'lookup_field': 'pk'},
@@ -101,27 +102,6 @@ class CreatorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Creator
-        fields = ('id', 'url', 'name', 'description')
-        extra_kwargs = {
-            'url': {'lookup_field': 'pk'},
-        }
-
-
-class CoverageSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(
-        max_length=50, validators=[
-            UniqueValidator(
-                queryset=Coverage.objects.all(),
-                message={
-                    'error': 'DUPLICATE_COVERAGE_NAME'
-                },
-                lookup='iexact'
-            )
-        ]
-    )
-
-    class Meta:
-        model = Coverage
         fields = ('id', 'url', 'name', 'description')
         extra_kwargs = {
             'url': {'lookup_field': 'pk'},
@@ -191,27 +171,6 @@ class KeywordSerializer(serializers.ModelSerializer):
         }
 
 
-class WorkareaSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(
-        max_length=50, validators=[
-            UniqueValidator(
-                queryset=Workarea.objects.all(),
-                message={
-                    'error': 'DUPLICATE_WORKAREA_NAME'
-                },
-                lookup='iexact'
-            )
-        ]
-    )
-
-    class Meta:
-        model = Workarea
-        fields = ('id', 'url', 'name', 'description')
-        extra_kwargs = {
-            'url': {'lookup_field': 'pk'},
-        }
-
-
 class LanguageSerializer(serializers.ModelSerializer):
     name = serializers.CharField(
         max_length=50, validators=[
@@ -227,6 +186,48 @@ class LanguageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Language
+        fields = ('id', 'url', 'name', 'description')
+        extra_kwargs = {
+            'url': {'lookup_field': 'pk'},
+        }
+
+
+class AudienceSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(
+        max_length=50, validators=[
+            UniqueValidator(
+                queryset=Audience.objects.all(),
+                message={
+                    'error': 'DUPLICATE_AUDIENCE'
+                },
+                lookup='iexact'
+            )
+        ]
+    )
+
+    class Meta:
+        model = Audience
+        fields = ('id', 'url', 'name', 'description')
+        extra_kwargs = {
+            'url': {'lookup_field': 'pk'},
+        }
+
+
+class ResourceTypeSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(
+        max_length=50, validators=[
+            UniqueValidator(
+                queryset=ResourceType.objects.all(),
+                message={
+                    'error': 'DUPLICATE_RESOURCETYPE'
+                },
+                lookup='iexact'
+            )
+        ]
+    )
+
+    class Meta:
+        model = ResourceType
         fields = ('id', 'url', 'name', 'description')
         extra_kwargs = {
             'url': {'lookup_field': 'pk'},
@@ -320,11 +321,11 @@ class DirectorySerializer(serializers.ModelSerializer):
 
     individual_files = serializers.PrimaryKeyRelatedField(many=True, queryset=Content.objects.all(), read_only=False)
     creators = serializers.PrimaryKeyRelatedField(many=True, queryset=Creator.objects.all(), read_only=False)
-    coverages = serializers.PrimaryKeyRelatedField(many=True, queryset=Coverage.objects.all(), read_only=False)
     subjects = serializers.PrimaryKeyRelatedField(many=True, queryset=Subject.objects.all(), read_only=False)
     keywords = serializers.PrimaryKeyRelatedField(many=True, queryset=Keyword.objects.all(), read_only=False)
-    workareas = serializers.PrimaryKeyRelatedField(many=True, queryset=Workarea.objects.all(), read_only=False)
     languages = serializers.PrimaryKeyRelatedField(many=True, queryset=Language.objects.all(), read_only=False)
+    audiences = serializers.PrimaryKeyRelatedField(many=True, queryset=Audience.objects.all(), read_only=False)
+    resourcetypes = serializers.PrimaryKeyRelatedField(many=True, queryset=ResourceType.objects.all(), read_only=False)
     catalogers = serializers.PrimaryKeyRelatedField(many=True, queryset=Cataloger.objects.all(), read_only=False)
     collections = serializers.PrimaryKeyRelatedField(many=True, queryset=Collection.objects.all(), read_only=False)
 
@@ -332,22 +333,22 @@ class DirectorySerializer(serializers.ModelSerializer):
         validated_data_copy = dict(validated_data)
         del validated_data_copy['individual_files']
         del validated_data_copy['creators']
-        del validated_data_copy['coverages']
         del validated_data_copy['subjects']
         del validated_data_copy['keywords']
-        del validated_data_copy['workareas']
         del validated_data_copy['languages']
+        del validated_data_copy['audiences']
+        del validated_data_copy['resourcetypes']
         del validated_data_copy['catalogers']
         del validated_data_copy['collections']
         directory = Directory(**validated_data_copy)
         self.__create_update(directory)
         directory.individual_files.set(validated_data['individual_files'])
         directory.creators.set(validated_data['creators'])
-        directory.coverages.set(validated_data['coverages'])
         directory.subjects.set(validated_data['subjects'])
         directory.keywords.set(validated_data['keywords'])
-        directory.workareas.set(validated_data['workareas'])
         directory.languages.set(validated_data['languages'])
+        directory.audiences.set(validated_data['audiences'])
+        directory.resourcetypes.set(validated_data['resourcetypes'])
         directory.catalogers.set(validated_data['catalogers'])
         directory.catalogers.set(validated_data['collections'])
         return directory
@@ -357,22 +358,22 @@ class DirectorySerializer(serializers.ModelSerializer):
         instance.dir_layout = validated_data.get('dir_layout', instance.dir_layout)
         instance.banner_file = validated_data.get('banner_file', instance.banner_file)
         instance.creators_need_all = validated_data.get('creators_need_all', instance.creators_need_all)
-        instance.coverages_need_all = validated_data.get('coverages_need_all', instance.coverages_need_all)
         instance.subjects_need_all = validated_data.get('subjects_need_all', instance.subjects_need_all)
         instance.keywords_need_all = validated_data.get('keywords_need_all', instance.keywords_need_all)
-        instance.workareas_need_all = validated_data.get('workareas_need_all', instance.workareas_need_all)
         instance.languages_need_all = validated_data.get('languages_need_all', instance.languages_need_all)
+        instance.audiences_need_all = validated_data.get('audiences_need_all', instance.audiences_need_all)
+        instance.resourcetypes_need_all = validated_data.get('resourcetypes_need_all', instance.resourcetypes_need_all)
         instance.catalogers_need_all = validated_data.get('catalogers_need_all', instance.catalogers_need_all)
         instance.collections_need_all = validated_data.get('collections_need_all', instance.collections_need_all)
         instance.parent = validated_data.get('parent', instance.parent)
         self.__create_update(instance)
         instance.individual_files.set(validated_data.get('individual_files', []))
         instance.creators.set(validated_data.get('creators', []))
-        instance.coverages.set(validated_data.get('coverages', []))
         instance.subjects.set(validated_data.get('subjects', []))
         instance.keywords.set(validated_data.get('keywords', []))
-        instance.workareas.set(validated_data.get('workareas', []))
         instance.languages.set(validated_data.get('languages', []))
+        instance.audiences.set(validated_data.get('audiences', []))
+        instance.resourcetypes.set(validated_data.get('resourcetypes', []))
         instance.catalogers.set(validated_data.get('catalogers', []))
         instance.collections.set(validated_data.get('collections', []))
         return instance
@@ -388,10 +389,10 @@ class DirectorySerializer(serializers.ModelSerializer):
         model = Directory
         fields = (
             'id', 'url', 'name', 'dir_layout', 'individual_files', 'banner_file', 'original_file_name',
-            'creators', 'coverages', 'subjects', 'keywords', 'workareas', 'languages', 'catalogers',
-            'creators_need_all', 'coverages_need_all', 'subjects_need_all', 'keywords_need_all',
-            'workareas_need_all', 'languages_need_all', 'catalogers_need_all', 'parent', 'collections',
-            'collections_need_all',
+            'creators', 'subjects', 'keywords', 'languages', 'catalogers', 'audiences', 'resourcetypes',
+            'creators_need_all', 'subjects_need_all', 'keywords_need_all', 'audiences_need_all',
+            'languages_need_all', 'catalogers_need_all', 'parent', 'collections',
+            'collections_need_all', 'resourcetypes_need_all'
         )
         read_only_fields = ('original_file_name',)
         validators = [

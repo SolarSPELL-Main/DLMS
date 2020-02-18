@@ -17,8 +17,8 @@ from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 
 from content_management.models import (
-    Build, Content, Directory, DirectoryLayout, Collection, Creator, Coverage, Workarea,
-    Keyword, Language, Subject, Cataloger
+    Build, Content, Directory, DirectoryLayout, Collection, Creator,
+    Keyword, Language, Subject, Cataloger, Audience, ResourceType
 )
 from content_management.storage import CustomFileStorage
 
@@ -283,11 +283,11 @@ class LibraryVersionBuildUtil:
 
     def __get_metadata_filter_criteria(self, directory):
         creators = directory.creators.all()
-        coverages = directory.coverages.all()
         subjects = directory.subjects.all()
         keywords = directory.keywords.all()
-        workareas = directory.workareas.all()
         languages = directory.languages.all()
+        audiences = directory.audiences.all()
+        resourcetypes = directory.resourcetypes.all()
         catalogers = directory.catalogers.all()
         collections = directory.collections.all()
 
@@ -297,13 +297,6 @@ class LibraryVersionBuildUtil:
             'creators',
             metadata_filter_criteria,
             directory.creators_need_all,
-        )
-
-        metadata_filter_criteria = self.__add_metadata_to_filter(
-            coverages,
-            'coverage',
-            metadata_filter_criteria,
-            directory.coverages_need_all,
         )
         metadata_filter_criteria = self.__add_metadata_to_filter(
             subjects,
@@ -318,16 +311,22 @@ class LibraryVersionBuildUtil:
             directory.keywords_need_all,
         )
         metadata_filter_criteria = self.__add_metadata_to_filter(
-            workareas,
-            'workareas',
-            metadata_filter_criteria,
-            directory.workareas_need_all,
-        )
-        metadata_filter_criteria = self.__add_metadata_to_filter(
             languages,
             'language',
             metadata_filter_criteria,
             directory.languages_need_all,
+        )
+        metadata_filter_criteria = self.__add_metadata_to_filter(
+            audiences,
+            'audience',
+            metadata_filter_criteria,
+            directory.audiences_need_all,
+        )
+        metadata_filter_criteria = self.__add_metadata_to_filter(
+            resourcetypes,
+            'resourcetypes',
+            metadata_filter_criteria,
+            directory.resourcetypes_need_all,
         )
         metadata_filter_criteria = self.__add_metadata_to_filter(
             catalogers,
@@ -409,24 +408,26 @@ def temporary_filename(dir=settings.TEMP_ROOT):
 
 # Takes a metadata sheet instance and loads all metadata from that uploaded csv sheet into the content database
 def load_metadata(metadata_sheet):
+    singletons = [
+        ["Cataloger", Cataloger], ["Language", Language], ["Audience", Audience],
+        ["Resource Type", ResourceType]
+    ]
+    multiples = [
+        ["Collection Type", Collection], ["Creator", Creator], ["Keyword", Keyword],
+        ["Subject", Subject]
+    ]
+
     contents = csv.DictReader(open(metadata_sheet.metadata_file.path))
     for row in contents:
-        print(row)
-        singletons = [["cataloger", Cataloger], ["coverage", Coverage], ["language", Language], ]
-        multiples = [
-            ["collections", Collection], ["creators", Creator], ["keywords", Keyword],
-            ["subjects", Subject], ["workareas", Workarea]
-        ]
         content_dict = {
-            "name": row["name"],
-            "description": row["description"],
+            "name": row["Title"],
+            "description": row["Description"],
             "updated_time": timezone.now(),
-            "audience": row["audience"],
             "last_uploaded_time": timezone.now(),
-            "original_file_name": row["filename"],
-            "source": row["source"],
+            "published_date": datetime.date(int(row["date"]), 1, 1),
+            "original_file_name": row["File Name"],
             "copyright": row["copyright"],
-            "rights_statement": row["rights_statement"],
+            "rights_statement": row["Rights Statement"],
             "active": 1,
         }
 
@@ -438,8 +439,9 @@ def load_metadata(metadata_sheet):
                 dict_key, model = metadata
                 try:
                     trimmed = row[dict_key].strip()
-                    obj, created = model.objects.get_or_create(name=trimmed)
-                    setattr(content_object, dict_key, obj)
+                    if trimmed != "":
+                        obj, created = model.objects.get_or_create(name=trimmed)
+                        setattr(content_object, dict_key, obj)
                 except ObjectDoesNotExist:
                     continue
 
@@ -449,9 +451,10 @@ def load_metadata(metadata_sheet):
                 field = getattr(content_object, dict_key)
                 for metadata_name in metadata_names:
                     trimmed = metadata_name.strip()
-                    obj, created = model.objects.get_or_create(name=trimmed)
-                    field.add(obj)
+                    if trimmed != "":
+                        obj, created = model.objects.get_or_create(name=trimmed)
+                        field.add(obj)
             content_object.save()
         except IntegrityError as e:
-            print(str(e))
+            print(e)
             continue

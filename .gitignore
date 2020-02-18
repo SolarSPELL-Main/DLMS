@@ -282,6 +282,7 @@ typings/
 
 # vscode settings
 .vscode/
+.VSCodeCounter/
 
 # pylama settings
 pylama.ini

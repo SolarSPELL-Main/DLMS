@@ -44,19 +44,19 @@ class DirectoryInfoBoard extends React.Component {
             bannerFile: null,
             bannerFileName: props.boardData.originalFileName ? props.boardData.originalFileName : '',
             creators: labels['creators'],
-            coverages: labels['coverages'],
             subjects: labels['subjects'],
             keywords: labels['keywords'],
-            workareas: labels['workareas'],
             languages: labels['languages'],
+            audiences: labels['audiences'],
+            resourcetypes: labels['resourcetypes'],
             catalogers: labels['catalogers'],
             collections: labels['collections'],
             creatorsNeedAll: (props.boardData.creatorsNeedAll ? 'All' : 'Any'),
-            coveragesNeedAll: (props.boardData.coveragesNeedAll ? 'All' : 'Any'),
             subjectsNeedAll: (props.boardData.subjectsNeedAll ? 'All' : 'Any'),
             keywordsNeedAll: (props.boardData.keywordsNeedAll ? 'All' : 'Any'),
-            workareasNeedAll: (props.boardData.workareasNeedAll ? 'All' : 'Any'),
             languagesNeedAll: (props.boardData.languagesNeedAll ? 'All' : 'Any'),
+            audiencesNeedAll: (props.boardData.audiencesNeedAll ? 'All' : 'Any'),
+            resourcetypesNeedAll: (props.boardData.resourcetypesNeedAll ? 'All' : 'Any'),
             catalogersNeedAll: (props.boardData.catalogersNeedAll ? 'All' : 'Any'),
             collectionsNeedAll: (props.boardData.collectionsNeedAll ? 'All' : 'Any'),
             selectedFiles: props.boardData.individualFiles,
@@ -152,19 +152,19 @@ class DirectoryInfoBoard extends React.Component {
                 bannerFile: null,
                 bannerFileName: props.boardData.originalFileName ? props.boardData.originalFileName : '',
                 creators: labels['creators'],
-                coverages: labels['coverages'],
                 subjects: labels['subjects'],
                 keywords: labels['keywords'],
-                workareas: labels['workareas'],
                 languages: labels['languages'],
+                audiences: labels['audiences'],
+                resourcetypes: labels['resourcetypes'],
                 catalogers: labels['catalogers'],
                 collections: labels['collections'],
                 creatorsNeedAll: (props.boardData.creatorsNeedAll ? 'All' : 'Any'),
-                coveragesNeedAll: (props.boardData.coveragesNeedAll ? 'All' : 'Any'),
                 subjectsNeedAll: (props.boardData.subjectsNeedAll ? 'All' : 'Any'),
                 keywordsNeedAll: (props.boardData.keywordsNeedAll ? 'All' : 'Any'),
-                workareasNeedAll: (props.boardData.workareasNeedAll ? 'All' : 'Any'),
                 languagesNeedAll: (props.boardData.languagesNeedAll ? 'All' : 'Any'),
+                audiencesNeedAll: (props.boardData.audiencesNeedAll ? 'All' : 'Any'),
+                resourcetypesNeedAll: (props.boardData.resourcetypesNeedAll ? 'All' : 'Any'),
                 catalogersNeedAll: (props.boardData.catalogersNeedAll ? 'All' : 'Any'),
                 collectionsNeedAll: (props.boardData.collectionsNeedAll ? 'All' : 'Any'),
                 selectedFiles: props.boardData.individualFiles,
@@ -211,20 +211,19 @@ class DirectoryInfoBoard extends React.Component {
         payload.append('dir_layout', this.state.dirLayoutId);
         this.state.selectedFiles.forEach(file => {payload.append('individual_files', file)});
         selectedTags['creators'].forEach(creator => {payload.append('creators', creator)});
-        selectedTags['coverages'].forEach(coverage => {payload.append('coverages', coverage)});
         selectedTags['subjects'].forEach(subject => {payload.append('subjects', subject)});
         selectedTags['collections'].forEach(collection => {payload.append('collections', collection)});
         selectedTags['keywords'].forEach(keyword => {payload.append('keywords', keyword)});
-        selectedTags['workareas'].forEach(workarea => {payload.append('workareas', workarea)});
         selectedTags['languages'].forEach(language => {payload.append('languages', language)});
+        selectedTags['audiences'].forEach(audience => {payload.append('audiences', audience)});
+        selectedTags['resourcetypes'].forEach(resourcetype => {payload.append('resourcetypes', resourcetype)});
         selectedTags['catalogers'].forEach(cataloger => {payload.append('catalogers', cataloger)});
         payload.append('creators_need_all', (this.state.creatorsNeedAll === 'All'));
-        payload.append('coverages_need_all', (this.state.coveragesNeedAll === 'All'));
         payload.append('subjects_need_all', (this.state.subjectsNeedAll === 'All'));
         payload.append('collections_need_all', (this.state.collectionsNeedAll === 'All'));
         payload.append('keywords_need_all', (this.state.keywordsNeedAll === 'All'));
-        payload.append('workareas_need_all', (this.state.workareasNeedAll === 'All'));
-        payload.append('languages_need_all', (this.state.languagesNeedAll === 'All'));
+        payload.append('audiences_need_all', (this.state.audiencesNeedAll === 'All'));
+        payload.append('resourcetypes_need_all', (this.state.resourcetypesNeedAll === 'All'));
         payload.append('catalogers_need_all', (this.state.catalogersNeedAll === 'All'));
         Boolean(this.state.parent) && payload.append('parent', this.state.parent);
         Boolean(this.state.bannerFile) && payload.append('banner_file', this.state.bannerFile);
@@ -342,7 +341,7 @@ class DirectoryInfoBoard extends React.Component {
     }
 
     handleUpdateMetadata() {
-        const toCheck = ["catalogers", "collections", "coverages", "creators", "keywords", "languages", "subjects", "workareas"]
+        const toCheck = ["catalogers", "collections", "creators", "keywords", "languages", "audiences", "resourcetypes", "subjects"]
         const retVal = {}
         toCheck.forEach(metadata => retVal[metadata] = this.state[metadata])
         this.props.updateMetadata(retVal)
@@ -501,28 +500,6 @@ class DirectoryInfoBoard extends React.Component {
                         <Grid item xs={3}>
                             <Select
                                 fullWidth
-                                value={this.state.coveragesNeedAll}
-                                displayEmpty
-                                name="coverage-operator"
-                                onChange={evt => this.handleOperatorChange(evt, 'coveragesNeedAll')}
-                            >
-                                <MenuItem value="All">All of the Coverages</MenuItem>
-                                <MenuItem value="Any">Any of the Coverages</MenuItem>
-                            </Select>
-                        </Grid>
-                        <Grid item xs={8}>
-                            <AutoCompleteWithChips suggestions={this.props.tags['coverages']}
-                                selectedItem={this.state.coverages}
-                                onAddition={addedTag => {this.handleChipAddition(addedTag, 'coverages')}}
-                                onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'coverages')}}
-                                required={true}
-                                errorMsg={this.state.fieldErrors.selectedTags} />
-                        </Grid>
-                    </Grid>
-                    <Grid container spacing={3}>
-                        <Grid item xs={3}>
-                            <Select
-                                fullWidth
                                 value={this.state.subjectsNeedAll}
                                 displayEmpty
                                 name="subjects-operator"
@@ -589,28 +566,6 @@ class DirectoryInfoBoard extends React.Component {
                         <Grid item xs={3}>
                             <Select
                                 fullWidth
-                                value={this.state.workareasNeedAll}
-                                displayEmpty
-                                name="workarea-operator"
-                                onChange={evt => this.handleOperatorChange(evt, 'workareasNeedAll')}
-                            >
-                                <MenuItem value="All">All of the Work Areas</MenuItem>
-                                <MenuItem value="Any">Any of the Work Areas</MenuItem>
-                            </Select>
-                        </Grid>
-                        <Grid item xs={8}>
-                            <AutoCompleteWithChips suggestions={this.props.tags['workareas']}
-                                selectedItem={this.state.workareas}
-                                onAddition={addedTag => {this.handleChipAddition(addedTag, 'workareas')}}
-                                onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'workareas')}}
-                                required={true}
-                                errorMsg={this.state.fieldErrors.selectedTags} />
-                        </Grid>
-                    </Grid>
-                    <Grid container spacing={3}>
-                        <Grid item xs={3}>
-                            <Select
-                                fullWidth
                                 value={this.state.languagesNeedAll}
                                 displayEmpty
                                 name="lang-operator"
@@ -625,6 +580,50 @@ class DirectoryInfoBoard extends React.Component {
                                 selectedItem={this.state.languages}
                                 onAddition={addedTag => {this.handleChipAddition(addedTag, 'languages')}}
                                 onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'languages')}}
+                                required={true}
+                                errorMsg={this.state.fieldErrors.selectedTags} />
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={3}>
+                        <Grid item xs={3}>
+                            <Select
+                                fullWidth
+                                value={this.state.audiencesNeedAll}
+                                displayEmpty
+                                name="lang-operator"
+                                onChange={evt => this.handleOperatorChange(evt, 'audiencesNeedAll')}
+                            >
+                                <MenuItem value="All">All of the Audiences</MenuItem>
+                                <MenuItem value="Any">Any of the Audiences</MenuItem>
+                            </Select>
+                        </Grid>
+                        <Grid item xs={8}>
+                            <AutoCompleteWithChips suggestions={this.props.tags['audiences']}
+                                selectedItem={this.state.audiences}
+                                onAddition={addedTag => {this.handleChipAddition(addedTag, 'audiences')}}
+                                onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'audiences')}}
+                                required={true}
+                                errorMsg={this.state.fieldErrors.selectedTags} />
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={3}>
+                        <Grid item xs={3}>
+                            <Select
+                                fullWidth
+                                value={this.state.resourcetypesNeedAll}
+                                displayEmpty
+                                name="lang-operator"
+                                onChange={evt => this.handleOperatorChange(evt, 'resourcetypesNeedAll')}
+                            >
+                                <MenuItem value="All">All of the Resource Types</MenuItem>
+                                <MenuItem value="Any">Any of the Resource Types</MenuItem>
+                            </Select>
+                        </Grid>
+                        <Grid item xs={8}>
+                            <AutoCompleteWithChips suggestions={this.props.tags['resourcetypes']}
+                                selectedItem={this.state.resourcetypes}
+                                onAddition={addedTag => {this.handleChipAddition(addedTag, 'resourcetypes')}}
+                                onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'resourcetypes')}}
                                 required={true}
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>

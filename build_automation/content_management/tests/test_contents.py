@@ -198,7 +198,6 @@ class ContentAPITest(APITestCase):
                 'coverage': '',
                 'subjects': [],
                 'keywords': [],
-                'workareas': [],
                 'language': '',
                 'cataloger': ''
             }
@@ -222,7 +221,6 @@ class ContentAPITest(APITestCase):
                 'coverage': '',
                 'subjects': [],
                 'keywords': [],
-                'workareas': [],
                 'language': '',
                 'cataloger': ''
             }
