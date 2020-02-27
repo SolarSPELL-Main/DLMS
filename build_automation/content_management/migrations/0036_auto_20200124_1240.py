@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('content_management', '0035_content_active'),
+        ('content_management', '0032_content_active'),
     ]
 
     operations = [

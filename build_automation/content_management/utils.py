@@ -271,15 +271,9 @@ class LibraryVersionBuildUtil:
             dest_path = os.path.join(self.ALL_FILES_PREFIX, os.path.basename(actual_file_name))
 
             if content.checksum not in copied_files:
-                build_file.add(content.content_file.path, arcname=dest_path)
                 copied_files.add(content.checksum)
-
-            link_to_file = tarfile.TarInfo(link_path)
-            link_to_file.type = tarfile.SYMTYPE
-            link_to_file.linkname = os.path.join(root_dir, dest_path)
-            build_file.addfile(link_to_file)
-
-        return (is_zip_file, file_name_only)
+            build_file.add(content.content_file.path, arcname=link_path)
+        return is_zip_file, file_name_only
 
     def __get_metadata_filter_criteria(self, directory):
         creators = directory.creators.all()

@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='content',
             name='active',
-            field=models.BooleanField(default=True),
+            field=models.SmallIntegerField(default=1),
         ),
     ]

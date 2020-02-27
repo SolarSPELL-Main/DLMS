@@ -29,9 +29,9 @@
                             {% for submenu in menu.submenu_list %}
                             <li>
                                 {% if submenu.files_at_root %}
-                                <a href="/{{submenu.path|urlencode }}/">
+                                <a href="/{{submenu.path}}/">
                                 {% else %}
-                                <a href="/content/{{submenu.path|urlencode }}/">
+                                <a href="/content/{{submenu.path}}/">
                                 {% endif %}
                                     {{submenu.name}}
                                 </a>

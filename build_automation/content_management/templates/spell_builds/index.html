@@ -49,9 +49,9 @@
                             {% for submenu in menu.submenu_list %}
                             <li>
                                 {% if submenu.files_at_root %}
-                                <a href="/{{submenu.path|urlencode }}/">
+                                <a href="/{{submenu.path }}/">
                                 {% else %}
-                                <a href="/content/{{submenu.path|urlencode }}/">
+                                <a href="/content/{{submenu.path }}/">
                                 {% endif %}
                                     {{submenu.name}}
                                 </a>
@@ -87,11 +87,11 @@
             <div class="col-xs-12 col-lg-4">
                 <br />
                 {% if folder.files_at_root %}
-                <a href="/{{ folder.path|urlencode }}/">
+                <a href="/{{ folder.path}}/">
                 {% else %}
-                <a href="/content/{{ folder.path|urlencode }}/">
+                <a href="/content/{{ folder.path}}/">
                 {% endif %}
-                    <img src="/img/{{ folder.banner_file|urlencode }}" class="center-block" style="max-height:140px">
+                    <img src="/img/{{ folder.banner_file}}" class="center-block" style="max-height:140px">
                 </a>
             </div>
             {% endfor %}
