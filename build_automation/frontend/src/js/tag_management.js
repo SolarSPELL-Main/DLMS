@@ -110,7 +110,7 @@ class TagManagementComponent extends React.Component {
             message: null,
             messageType: 'info',
             currentView: 'manage',
-            currentTitle: 'Coverages',
+            currentTitle: 'Subjects',
             expanded: null,
             listUrl: null,
             detailUrl: null,
@@ -124,11 +124,6 @@ class TagManagementComponent extends React.Component {
                 { name: 'name', title: 'Name' },
             ],
             keywordRows: [],
-            coverageColumns: [
-                { name: 'actions', title: 'Actions', getCellValue: this.getActionPanel},
-                { name: 'name', title: 'Name' },
-            ],
-            coverageRows: [],
             collectionColumns: [
                 { name: 'actions', title: 'Actions', getCellValue: this.getActionPanel},
                 { name: 'name', title: 'Name' },
@@ -139,16 +134,21 @@ class TagManagementComponent extends React.Component {
                 { name: 'name', title: 'Name' },
             ],
             subjectRows: [],
-            workareaColumns: [
-                { name: 'actions', title: 'Actions', getCellValue: this.getActionPanel},
-                { name: 'name', title: 'Name' },
-            ],
-            workareaRows: [],
             languageColumns: [
                 { name: 'actions', title: 'Actions', getCellValue: this.getActionPanel},
                 { name: 'name', title: 'Name' },
             ],
             languageRows: [],
+            audienceColumns: [
+                { name: 'actions', title: 'Actions', getCellValue: this.getActionPanel},
+                { name: 'name', title: 'Name' },
+            ],
+            audienceRows: [],
+            resourcetypeColumns: [
+                { name: 'actions', title: 'Actions', getCellValue: this.getActionPanel},
+                { name: 'name', title: 'Name' },
+            ],
+            resourcetypeRows: [],
             catalogerColumns: [
                 { name: 'actions', title: 'Actions', getCellValue: this.getActionPanel},
                 { name: 'name', title: 'Name' },
@@ -166,11 +166,6 @@ class TagManagementComponent extends React.Component {
                 list_url: APP_URLS.CREATORS_LIST,
                 display_plural: "Creators",
             },
-            coverage: {
-                detail_url: APP_URLS.COVERAGES_DETAIL,
-                list_url: APP_URLS.COVERAGES_LIST,
-                display_plural: "Coverages",
-            },
             subject: {
                 detail_url: APP_URLS.SUBJECTS_DETAIL,
                 list_url: APP_URLS.SUBJECTS_LIST,
@@ -181,15 +176,20 @@ class TagManagementComponent extends React.Component {
                 list_url: APP_URLS.KEYWORDS_LIST,
                 display_plural: "Keywords",
             },
-            workarea: {
-                detail_url: APP_URLS.WORKAREAS_DETAIL,
-                list_url: APP_URLS.WORKAREAS_LIST,
-                display_plural: "Workareas",
-            },
             language: {
                 detail_url: APP_URLS.LANGUAGES_DETAIL,
                 list_url: APP_URLS.LANGUAGES_LIST,
                 display_plural: "Languages",
+            },
+            audience: {
+                detail_url: APP_URLS.AUDIENCES_DETAIL,
+                list_url: APP_URLS.AUDIENCES_LIST,
+                display_plural: "Audiences",
+            },
+            resourcetype: {
+                detail_url: APP_URLS.RESOURCETYPES_DETAIL,
+                list_url: APP_URLS.RESOURCETYPES_LIST,
+                display_plural: "Resource Types",
             },
             cataloger: {
                 detail_url: APP_URLS.CATALOGERS_DETAIL,
@@ -334,9 +334,9 @@ class TagManagementComponent extends React.Component {
                 keywordRows: response['keywords'],
                 subjectRows: response['subjects'],
                 collectionRows: response['collections'],
-                coverageRows: response['coverages'],
-                workareaRows: response['workareas'],
                 languageRows: response['languages'],
+                audienceRows: response['audiences'],
+                resourcetypeRows: response['resourcetypes'],
                 catalogerRows: response['catalogers'],
             })
         }).catch(function (error) {

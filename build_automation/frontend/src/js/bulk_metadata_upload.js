@@ -47,15 +47,15 @@ class BulkMetadataUpload extends React.Component {
             //Below is the state of the upload content module; use this to adjust the metadata updates
             description: "",
             creators: props.content.creators,
-            coverages: props.content.coverages,
             subjects: props.content.subjects,
             keywords: props.content.keywords,
-            workareas: props.content.workareas,
             languages: props.content.languages,
+            audiences: props.content.audiences,
+            resourcetypes: props.content.resourcetypes,
             catalogers: props.content.catalogers,
             collections: props.content.collections,
             //fieldErrors: {},
-            selectedDate: props.content.updatedDate,
+            selectedDate: props.content.publishedDate,
             source: props.content.source,
             copyright: props.content.copyright,
             rightsStatement: props.content.rightsStatement,
@@ -167,19 +167,21 @@ class BulkMetadataUpload extends React.Component {
                                       }
                                          
                                    }
+                                    for (var x = 0; x < currInstance.props.allTags.audiences.length; x++){
+                                        if (parsed[i]["Audience"] == currInstance.props.allTags.audiences[x].name) {
+                                            payload.append('audience', currInstance.props.allTags.audiences[x].id);                                    
+                                        }
+                                    }
+                                    for (var x = 0; x < currInstance.props.allTags.resourcetypes.length; x++){
+                                        if (parsed[i]["ResourceType"] == currInstance.props.allTags.resourcetypes[x].name) {
+                                            payload.append('resourcetype', currInstance.props.allTags.resourcetypes[x].id);                                    
+                                        }
+                                    }
                                    
                                     for (var x = 0; x < currInstance.props.allTags.subjects.length; x++){
                                       if (parsed[i]["Subject"] == currInstance.props.allTags.subjects[x].name) {
                                           
                                       payload.append('subjects', currInstance.props.allTags.subjects[x].id);
-                                      
-                                      }
-                                   }
-                                   
-                                    for (var x = 0; x < currInstance.props.allTags.coverages.length; x++){
-                                      if (parsed[i]["Coverage (Spatial)"] == currInstance.props.allTags.coverages[x].name) {
-                                          
-                                      payload.append('coverage', currInstance.props.allTags.coverages[x].id);
                                       
                                       }
                                    }

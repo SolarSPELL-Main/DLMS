@@ -56,7 +56,7 @@ function ChippedTagsFormatter(input) {
             allChips.push(<Chip key={row.id + '_' + columnName + '_' + eachTagId} label={__tagIdsTagsMap[columnName][eachTagId]['name']} />);
         });
     } else if (Number.isInteger(value)) {
-        columnName += 's'; // To match the languages, catalogers and coverages.
+        columnName += 's'; // To match the languages, catalogers.
         allChips.push(<Chip key={row.id + '_' + columnName + '_' + input} label={__tagIdsTagsMap[columnName][value]['name']} />);
     }
     return allChips;
@@ -122,36 +122,36 @@ class FileSelectionComponent extends React.Component {
         this.columns = [
             {name: 'name', title: 'Name', filterType: 'textfield'},
             {name: 'description', title: 'Description', filterType: 'textfield'},
-            {name: 'updated_time', title: 'Updated on', filterType: 'textfield'},
+            {name: 'published_date', title: 'Published on', filterType: 'textfield'},
             {name: 'creators', title: 'Creators', filterType: 'autocomplete', tagKey: 'creators'},
-            {name: 'coverage', title: 'Coverage', filterType: 'autocomplete', tagKey: 'coverages'},
             {name: 'subjects', title: 'Subjects', filterType: 'autocomplete', tagKey: 'subjects'},
             {name: 'collections', title: 'Collections', filterType: 'autocomplete', tagKey: 'collections'},
             {name: 'keywords', title: 'Keywords', filterType: 'autocomplete', tagKey: 'keywords'},
-            {name: 'workareas', title: 'Workareas', filterType: 'autocomplete', tagKey: 'workareas'},
             {name: 'language', title: 'Language', filterType: 'autocomplete', tagKey: 'languages'},
+            {name: 'audience', title: 'Audience', filterType: 'autocomplete', tagKey: 'audiences'},
+            {name: 'resourcetype', title: 'Resource Type', filterType: 'autocomplete', tagKey: 'resourcetypes'},
             {name: 'cataloger', title: 'Cataloger', filterType: 'autocomplete', tagKey: 'catalogers'},
         ];
         this.defaultColumnWidths = [
             {columnName: 'name', width: 230},
             {columnName: 'description', width: 250},
-            {columnName: 'updated_time', width: 240},
+            {columnName: 'published_date', width: 240},
             {columnName: 'creators', width: 420},
-            {columnName: 'coverage', width: 420},
             {columnName: 'subjects', width: 420},
             {columnName: 'keywords', width: 420},
-            {columnName: 'workareas', width: 420},
             {columnName: 'language', width: 240},
+            {columnName: 'audience', width: 240},
+            {columnName: 'resourcetype', width: 240},
             {columnName: 'cataloger', width: 240},
             {columnName: 'collections', width: 240},
         ];
         this.filterExtensions = [
             {columnName: 'creators', predicate: filterThroughArray},
-            {columnName: 'coverage', predicate: filterThroughArray},
             {columnName: 'subjects', predicate: filterThroughArray},
             {columnName: 'keywords', predicate: filterThroughArray},
-            {columnName: 'workareas', predicate: filterThroughArray},
             {columnName: 'language', predicate: filterThroughArray},
+            {columnName: 'resourcetype', predicate: filterThroughArray},
+            {columnName: 'resourcetype', predicate: filterThroughArray},
             {columnName: 'cataloger', predicate: filterThroughArray},
             {columnName: 'collections', predicate: filterThroughArray},
         ];
@@ -285,7 +285,7 @@ class FileSelectionComponent extends React.Component {
                     Add Selected
                 </Button>
                 <Grid rows={this.props.allFiles} columns={this.columns}>
-                    <ChippedTagsTypeProvider for={['creators', 'coverage', 'subjects', 'keywords', 'workareas', 'language', 'cataloger', 'collections']} />
+                    <ChippedTagsTypeProvider for={['creators', 'subjects', 'keywords', 'language', 'audience', 'resourcetype', 'cataloger', 'collections']} />
                     <LinkTypeProvider for={['content_file']} />
 
                     
@@ -343,7 +343,7 @@ class FileSelectionComponent extends React.Component {
                 </Typography>
                 
                 <Grid rows={this.state.selectedFiles} columns={this.columns}>
-                    <ChippedTagsTypeProvider for={['creators', 'coverage', 'subjects', 'keywords', 'workareas', 'language', 'cataloger', 'collections']} />
+                    <ChippedTagsTypeProvider for={['creators', 'subjects', 'keywords', 'language', 'audience', 'resourcetype', 'cataloger', 'collections']} />
                     <LinkTypeProvider for={['content_file']} />
                     <FilteringState defaultFilters={[]} columnExtensions={[{columnName: 'content_file', filteringEnabled: false}]} />
                     <IntegratedFiltering  columnExtensions={this.filterExtensions} />
