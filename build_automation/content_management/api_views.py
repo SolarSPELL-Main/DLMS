@@ -297,7 +297,7 @@ class SpreadsheetView(ViewSet):
             'fields': {
                 'name': ['field', 0],
                 'description': ['field', 1],
-                'updated_time': ['field', 2],
+                'published_date': ['field', 2],
                 'creators': ['many', 3],
                 'subjects': ['many', 4],
                 'keywords': ['many', 5],
@@ -306,8 +306,7 @@ class SpreadsheetView(ViewSet):
                 'active': ['field', 8],
                 'audience': ['foreign', 9],
                 'resourcetype': ['foreign', 10],
-                'collections': ['many', 11],
-                'published_date': ['field', 12]
+                'collection': ['foreign', 11]
             }
         }
     }

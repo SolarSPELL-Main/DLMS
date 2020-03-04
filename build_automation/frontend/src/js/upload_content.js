@@ -8,6 +8,7 @@ import TextField from '@material-ui/core/TextField';
 import {DatePicker} from '@material-ui/pickers';
 import {APP_URLS} from "./url";
 import Snackbar from '@material-ui/core/Snackbar';
+import Checkbox from '@material-ui/core/Checkbox'
 import DateFnsUtils from "@date-io/date-fns"
 import {MuiPickersUtilsProvider} from '@material-ui/pickers';
 import {ChevronLeft, ChevronRight} from '@material-ui/icons';
@@ -60,6 +61,7 @@ class UploadContent extends React.Component{
             rightsStatement: props.content.rightsStatement,
             contentFile: null,
             contentFileName: props.content.originalFileName ? props.content.originalFileName : '',
+            active: props.content.active==1 ? true : false,
         };
         this.tags = props.allTags;
         this.tagNameTagMap = this.buildTagNameTagMap(props.allTags);
@@ -316,9 +318,9 @@ class UploadContent extends React.Component{
         payload.append('description', this.state.description);
         selectedTags.creators.forEach(creator => {payload.append('creators', creator)});
         selectedTags.subjects.forEach(subject => {payload.append('subjects', subject)});
-        selectedTags.collections.forEach(collection => {payload.append('collections', collection)});
         selectedTags.keywords.forEach(keyword => {payload.append('keywords', keyword)});
         selectedTags.languages.length>0 && payload.append('language', selectedTags.languages[0]);
+        selectedTags.collections.length>0 && payload.append('collection', selectedTags.collections[0]);
         selectedTags.audiences.length>0 && payload.append('audience', selectedTags.audiences[0]);
         selectedTags.resourcetypes.length>0 && payload.append('resourcetype', selectedTags.resourcetypes[0]);
         selectedTags.catalogers.length>0 && payload.append('cataloger', selectedTags.catalogers[0]);
@@ -327,6 +329,7 @@ class UploadContent extends React.Component{
         Boolean(this.state.source) && payload.append('source', this.state.source);
         Boolean(this.state.copyright) && payload.append('copyright', this.state.copyright);
         Boolean(this.state.rightsStatement) && payload.append('rights_statement', this.state.rightsStatement);
+        payload.append('active', this.state.active ? 1 : 0);
         const currInstance = this;
         if (this.state.id > 0) {
             // Update an existing directory.
@@ -474,7 +477,7 @@ class UploadContent extends React.Component{
                 <MuiPickersUtilsProvider utils={DateFnsUtils}>
                     <DatePicker
                         id="updated_date"
-                        label="Last Updated:"
+                        label="Published Date:"
                         value={this.state.selectedDate}
                         onChange={this.handleDateChange}
                         leftArrowIcon={<ChevronLeft/>}
@@ -501,7 +504,7 @@ class UploadContent extends React.Component{
                         </span>
                         <div style={{marginTop: '20px'}}> </div>
                 <Typography gutterBottom variant="subtitle1">
-                    Collection(s)
+                    Collection
                 </Typography>
                 <span>
                             <AutoCompleteWithChips suggestions={this.props.allTags['collections']}
@@ -554,14 +557,6 @@ class UploadContent extends React.Component{
                                                    onAddition={this.handleCatalogerAddition} onDeletion={this.handleCatalogerDeletion}/>
                         </span>
                 <div style={{marginTop: '20px'}}> </div>
-                <Typography gutterBottom variant="subtitle1">
-                    Collection
-                </Typography>
-                <span>
-                            <AutoCompleteWithChips maxChips={1} suggestions={this.props.allTags['collections']} searchKey={'name'}
-                                                   selectedItem={this.state.collections}
-                                                   onAddition={this.handleCollectionAddition} onDeletion={this.handleCollectionDeletion}/>
-                        </span>
                 <TextField
                     id="source"
                     label="Source *"
@@ -589,6 +584,17 @@ class UploadContent extends React.Component{
                     fullWidth
                     margin="normal"
                 />
+                <Typography gutterBottom variant="subtitle1">
+                    Active
+                </Typography>
+                <Checkbox
+                    id="checkbox"
+                    label="Active"
+                    checked={this.state.active}
+                    onChange={evt => this.setState({active: evt.target.checked})}
+                    color='primary'
+                />
+                <br />
                 <Button variant="contained" component="span" onClick={this.saveContent}>
                     Save
                 </Button>

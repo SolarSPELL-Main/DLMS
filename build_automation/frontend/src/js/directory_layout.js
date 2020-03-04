@@ -144,7 +144,7 @@ class DirectoryLayoutComponent extends React.Component {
                 audience: [infoBoardData.audiencesNeedAll, false, "audiences"],
                 resourcetype: [infoBoardData.resourcetypesNeedAll, false, "resourcetypes"],
                 subjects: [infoBoardData.subjectsNeedAll, true, "subjects"],
-                collections: [infoBoardData.collectionsNeedAll, true, "collections"],
+                collection: [infoBoardData.collectionsNeedAll, true, "collections"],
             }
             const entries = Object.entries(metadataInfoMap)
 

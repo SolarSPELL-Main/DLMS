@@ -30,20 +30,20 @@ class ContentSerializer(serializers.ModelSerializer):
     cataloger = serializers.PrimaryKeyRelatedField(
         queryset=Cataloger.objects.all(), read_only=False, allow_null=True, required=False
     )
-    collections = serializers.PrimaryKeyRelatedField(many=True, queryset=Collection.objects.all(), read_only=False)
+    collection = serializers.PrimaryKeyRelatedField(
+        queryset=Collection.objects.all(), read_only=False, allow_null=True, required=False
+    )
 
     def create(self, validated_data):
         validated_data_copy = dict(validated_data)
         del validated_data_copy['creators']
         del validated_data_copy['subjects']
         del validated_data_copy['keywords']
-        del validated_data_copy['collections']
         content = Content(**validated_data_copy)
         content = self.__create_update(content, None)
         content.creators.set(validated_data['creators'])
         content.subjects.set(validated_data['subjects'])
         content.keywords.set(validated_data['keywords'])
-        content.collections.set(validated_data['collections'])
         content.active = validated_data['active']
         return content
 
@@ -54,7 +54,7 @@ class ContentSerializer(serializers.ModelSerializer):
         content.creators.set(validated_data.get('creators', []))
         content.subjects.set(validated_data.get('subjects', []))
         content.keywords.set(validated_data.get('keywords', []))
-        content.collections.set(validated_data.get('collections', []))
+        content.collection = (validated_data.get('collection', content.collection))
         content.language = (validated_data.get('language', content.language))
         content.cataloger = (validated_data.get('cataloger', content.cataloger))
         content.updated_time = (validated_data.get('updated_time', content.updated_time))
@@ -77,10 +77,10 @@ class ContentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Content
         fields = (
-                    'url', 'id', 'name', 'description', 'content_file', 'updated_time', 'last_uploaded_time',
-                    'creators', 'subjects', 'keywords', 'language', 'cataloger', 'original_file_name', 'audience',
-                    'copyright', 'rights_statement', 'active', 'resourcetype', 'collections', 'published_date'
-                )
+            'url', 'id', 'name', 'description', 'content_file', 'updated_time', 'last_uploaded_time',
+            'creators', 'subjects', 'keywords', 'language', 'cataloger', 'original_file_name', 'audience',
+            'copyright', 'rights_statement', 'active', 'resourcetype', 'collection', 'published_date'
+        )
         read_only_fields = ('original_file_name',)
         extra_kwargs = {
             'url': {'lookup_field': 'pk'},

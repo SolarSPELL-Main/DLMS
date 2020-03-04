@@ -25,7 +25,7 @@ class ContentsFilterSet(FilterSet):
             'audience': ['in'],
             'resourcetype': ['in'],
             'original_file_name': ['icontains'],
-            'collections': ['in']
+            'collection': ['in']
         }
 
     @classmethod

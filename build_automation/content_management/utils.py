@@ -403,24 +403,23 @@ def temporary_filename(dir=settings.TEMP_ROOT):
 # Takes a metadata sheet instance and loads all metadata from that uploaded csv sheet into the content database
 def load_metadata(metadata_sheet):
     singletons = [
-        ["Cataloger", Cataloger], ["Language", Language], ["Audience", Audience],
-        ["Resource Type", ResourceType]
+        ["Cataloger", "cataloger", Cataloger], ["Language", "language", Language], ["Audience", "audience", Audience],
+        ["Resource Type", "resourcetype", ResourceType], ["Collection Type", "collection", Collection]
     ]
-    multiples = [
-        ["Collection Type", Collection], ["Creator", Creator], ["Keyword", Keyword],
-        ["Subject", Subject]
-    ]
+    multiples = [["Creator", "creators", Creator], ["Keyword", "keywords", Keyword], ["Subject", "subjects", Subject]]
 
     contents = csv.DictReader(open(metadata_sheet.metadata_file.path))
     for row in contents:
+        year_str = row["Date"]
+        year = int(year_str) if year_str != '' else 2020
         content_dict = {
             "name": row["Title"],
             "description": row["Description"],
             "updated_time": timezone.now(),
             "last_uploaded_time": timezone.now(),
-            "published_date": datetime.date(int(row["date"]), 1, 1),
+            "published_date": datetime.date(year, 1, 1),
             "original_file_name": row["File Name"],
-            "copyright": row["copyright"],
+            "copyright": row["Copyright"],
             "rights_statement": row["Rights Statement"],
             "active": 1,
         }
@@ -430,19 +429,19 @@ def load_metadata(metadata_sheet):
             content_object.save()
 
             for metadata in singletons:
-                dict_key, model = metadata
+                dict_key, member_key, model = metadata
                 try:
                     trimmed = row[dict_key].strip()
                     if trimmed != "":
                         obj, created = model.objects.get_or_create(name=trimmed)
-                        setattr(content_object, dict_key, obj)
+                        setattr(content_object, member_key, obj)
                 except ObjectDoesNotExist:
                     continue
 
             for metadata in multiples:
-                dict_key, model = metadata
+                dict_key, member_key, model = metadata
                 metadata_names = row[dict_key].split("|")
-                field = getattr(content_object, dict_key)
+                field = getattr(content_object, member_key)
                 for metadata_name in metadata_names:
                     trimmed = metadata_name.strip()
                     if trimmed != "":

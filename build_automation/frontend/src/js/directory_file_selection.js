@@ -125,7 +125,7 @@ class FileSelectionComponent extends React.Component {
             {name: 'published_date', title: 'Published on', filterType: 'textfield'},
             {name: 'creators', title: 'Creators', filterType: 'autocomplete', tagKey: 'creators'},
             {name: 'subjects', title: 'Subjects', filterType: 'autocomplete', tagKey: 'subjects'},
-            {name: 'collections', title: 'Collections', filterType: 'autocomplete', tagKey: 'collections'},
+            {name: 'collection', title: 'Collection', filterType: 'autocomplete', tagKey: 'collections'},
             {name: 'keywords', title: 'Keywords', filterType: 'autocomplete', tagKey: 'keywords'},
             {name: 'language', title: 'Language', filterType: 'autocomplete', tagKey: 'languages'},
             {name: 'audience', title: 'Audience', filterType: 'autocomplete', tagKey: 'audiences'},
@@ -143,7 +143,7 @@ class FileSelectionComponent extends React.Component {
             {columnName: 'audience', width: 240},
             {columnName: 'resourcetype', width: 240},
             {columnName: 'cataloger', width: 240},
-            {columnName: 'collections', width: 240},
+            {columnName: 'collection', width: 240},
         ];
         this.filterExtensions = [
             {columnName: 'creators', predicate: filterThroughArray},
@@ -153,7 +153,7 @@ class FileSelectionComponent extends React.Component {
             {columnName: 'resourcetype', predicate: filterThroughArray},
             {columnName: 'resourcetype', predicate: filterThroughArray},
             {columnName: 'cataloger', predicate: filterThroughArray},
-            {columnName: 'collections', predicate: filterThroughArray},
+            {columnName: 'collection', predicate: filterThroughArray},
         ];
         this.getFilterCellComponent = this.getFilterCellComponent.bind(this);
         this.handleFilesRightClick = this.handleFilesRightClick.bind(this);
@@ -285,7 +285,7 @@ class FileSelectionComponent extends React.Component {
                     Add Selected
                 </Button>
                 <Grid rows={this.props.allFiles} columns={this.columns}>
-                    <ChippedTagsTypeProvider for={['creators', 'subjects', 'keywords', 'language', 'audience', 'resourcetype', 'cataloger', 'collections']} />
+                    <ChippedTagsTypeProvider for={['creators', 'subjects', 'keywords', 'language', 'audience', 'resourcetype', 'cataloger', 'collection']} />
                     <LinkTypeProvider for={['content_file']} />
 
                     
@@ -343,7 +343,7 @@ class FileSelectionComponent extends React.Component {
                 </Typography>
                 
                 <Grid rows={this.state.selectedFiles} columns={this.columns}>
-                    <ChippedTagsTypeProvider for={['creators', 'subjects', 'keywords', 'language', 'audience', 'resourcetype', 'cataloger', 'collections']} />
+                    <ChippedTagsTypeProvider for={['creators', 'subjects', 'keywords', 'language', 'audience', 'resourcetype', 'cataloger', 'collection']} />
                     <LinkTypeProvider for={['content_file']} />
                     <FilteringState defaultFilters={[]} columnExtensions={[{columnName: 'content_file', filteringEnabled: false}]} />
                     <IntegratedFiltering  columnExtensions={this.filterExtensions} />

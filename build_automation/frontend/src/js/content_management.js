@@ -284,7 +284,8 @@ class ContentManagement extends React.Component{
                 source: "",
                 copyright: "",
                 rightsStatement: "",
-                originalFileName: ""
+                originalFileName: "",
+                active: 1,
             }
         })
     }
@@ -311,7 +312,8 @@ class ContentManagement extends React.Component{
                 source: "",
                 copyright: "",
                 rightsStatement: "",
-                originalFileName: ""
+                originalFileName: "",
+                active: 1,
             }
         })
     }
@@ -336,7 +338,8 @@ class ContentManagement extends React.Component{
                 source: "",
                 copyright: "",
                 rightsStatement: "",
-                originalFileName: ""
+                originalFileName: "",
+                active: 1,
             }
         })
     }
@@ -358,7 +361,7 @@ class ContentManagement extends React.Component{
                 keywords: content.keywords||[],
                 languages: content.language?[content.language]:[],
                 audiences: content.audience?[content.audience]:[],
-                resourcetypes: content.resourcetype?[content.resourcetypes]:[],
+                resourcetypes: content.resourcetype?[content.resourcetype]:[],
                 catalogers: content.cataloger?[content.cataloger]:[],
                 updatedDate: this.parseDate(content.updated_time),
                 publishedDate: this.parseDate(content.published_date),
@@ -366,6 +369,7 @@ class ContentManagement extends React.Component{
                 copyright: content.copyright||'',
                 rightsStatement: content.rights_statement||'',
                 originalFileName: content.original_file_name,
+                active: content.active||1
             }
         })
     }

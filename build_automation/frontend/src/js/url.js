@@ -50,9 +50,10 @@ const FILTER_PARAMS = {
         'keywords': ['in'],
         'language': ['in'],
         'cataloger': ['in'],
-        'collections': ['in'],
+        'collection': ['in'],
         'active': [null],
-        'original_file_name': ['icontains']
+        'original_file_name': ['icontains'],
+        'resourcetypes': ['in'],
     },
     DIRLAYOUT_METADATA: {
         'creators': ['in'],
@@ -61,6 +62,8 @@ const FILTER_PARAMS = {
         'keywords': ['in'],
         'languages': ['in'],
         'catalogers': ['in'],
+        'resourcetypes': ['in'],
+        'audiences': ['in'],
     }
 }
 
