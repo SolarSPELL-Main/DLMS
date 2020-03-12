@@ -169,7 +169,7 @@ class UploadContent extends React.Component{
     * Change the date data
     */
     handleDateChange(date){
-        this.setState({ selectedDate: date });
+        this.setState({ selectedDate: new Date(date.getFullYear(), 0, 1) });
     };
     /*
     * Handler for an addition to tags
@@ -476,6 +476,7 @@ class UploadContent extends React.Component{
                 <div style={{marginTop: '20px'}}> </div>
                 <MuiPickersUtilsProvider utils={DateFnsUtils}>
                     <DatePicker
+                        views={["year"]}
                         id="updated_date"
                         label="Published Date:"
                         value={this.state.selectedDate}

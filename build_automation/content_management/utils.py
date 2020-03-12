@@ -431,10 +431,12 @@ def load_metadata(metadata_sheet):
             for metadata in singletons:
                 dict_key, member_key, model = metadata
                 try:
-                    trimmed = row[dict_key].strip()
-                    if trimmed != "":
-                        obj, created = model.objects.get_or_create(name=trimmed)
-                        setattr(content_object, member_key, obj)
+                    raw_metadata = row[dict_key]
+                    if raw_metadata is not None:
+                        trimmed = raw_metadata.strip()
+                        if trimmed != "":
+                            obj, created = model.objects.get_or_create(name=trimmed)
+                            setattr(content_object, member_key, obj)
                 except ObjectDoesNotExist:
                     continue
 
